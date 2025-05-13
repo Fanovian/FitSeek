@@ -1,17 +1,71 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
-		{
-			"path": "pages/index/index",
-			"style": {
-				"navigationBarTitleText": "uni-app"
-			}
+	"pages": [
+	  {
+		"path": "pages/home/index",
+		"style": {
+		  "navigationBarTitleText": "健康助手",
+		  "backgroundColor": "#f0fff0"
 		}
+	  },
+	  {
+		"path": "pages/training/index",
+		"style": {
+		  "navigationBarTitleText": "训练计划",
+		  "backgroundColor": "#f0fff0"
+		}
+	  },
+	  {
+		"path": "pages/recipe/index",
+		"style": {
+		  "navigationBarTitleText": "食谱推荐",
+		  "backgroundColor": "#f0fff0"
+		}
+	  },
+	  {
+		"path": "pages/user/index",
+		"style": {
+		  "navigationBarTitleText": "我的",
+		  "backgroundColor": "#f0fff0"
+		}
+	  }
 	],
 	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
+	  "backgroundColor": "#f0fff0",
+	  "navigationStyle": "default"
+	},
+	"tabBar": {
+	  "color": "#666",
+	  "selectedColor": "#228B22",
+	  "list": [
+		{
+		  "pagePath": "pages/home/index",
+		  "text": "主页",
+		  "iconPath": "assets/icons/home.png",
+		  "selectedIconPath": "assets/icons/home-active.png"
+		},
+		{
+		  "pagePath": "pages/training/index",
+		  "text": "训练",
+		  "iconPath": "assets/icons/training.png",
+		  "selectedIconPath": "assets/icons/training-active.png"
+		},
+		{
+		  "pagePath": "pages/recipe/index",
+		  "text": "食谱",
+		  "iconPath": "assets/icons/recipe.png",
+		  "selectedIconPath": "assets/icons/recipe-active.png"
+		},
+		{
+		  "pagePath": "pages/user/index",
+		  "text": "我的",
+		  "iconPath": "assets/icons/user.png",
+		  "selectedIconPath": "assets/icons/user-active.png"
+		}
+	  ]
+	},
+	"easycom": {
+	  "autoscan": true,
+	  "custom": {}
 	},
 	"uniIdRouter": {}
-}
+  }
