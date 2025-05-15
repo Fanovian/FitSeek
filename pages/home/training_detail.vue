@@ -1,11 +1,9 @@
 <!-- pages/training-detail/index.vue -->
 <template>
     <view class="detail-container">
-      <view class="training-summary">
-        <text class="summary-title">本周锻炼概览</text>
-        <view class="summary-item">
-          <text>总时长：{{ totalDuration }}分钟</text>
-          <text>平均时长：{{ avgDuration }}分钟/次</text>
+      <view class="chart-container">
+        <text>锻炼时长变化趋势图表</text>
+        <view class="trend">
           <text v-if="trend > 0" class="positive">总体趋势：+{{ trend }}分钟</text>
           <text v-else-if="trend < 0" class="negative">总体趋势：{{ trend }}分钟</text>
           <text v-else>总体趋势：无变化</text>
@@ -35,17 +33,6 @@ export default {
     };
   },
   computed: {
-    totalDuration() {
-      return this.detailedRecords.reduce((sum, item) => {
-        const duration = parseInt(item.duration);
-        return sum + (isNaN(duration) ? 0 : duration);
-      }, 0);
-    },
-    avgDuration() {
-      return this.detailedRecords.length
-        ? (this.totalDuration / this.detailedRecords.length).toFixed(1)
-        : 0;
-    },
     trend() {
       if (this.detailedRecords.length < 2) return 0;
       const first = parseInt(this.detailedRecords[0].duration);
@@ -58,27 +45,43 @@ export default {
   }
 };
 </script>
-  
-  <style scoped>
-  .training-summary {
-    padding: 20rpx;
-  }
-  
-  .summary-title {
-    font-weight: bold;
-    margin-bottom: 15rpx;
-  }
-  
-  .summary-item {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10rpx;
-  }
-  
-  .positive {
-    color: #4CAF50;
-  }
-  .negative {
-    color: #F44336;
-  }
-  </style>
+
+<style scoped>
+.detail-container {
+  padding: 20rpx;
+}
+
+.chart-container {
+  height: 400rpx;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.trend {
+  margin-top: 10rpx;
+  font-size: 28rpx;
+}
+
+.record-list {
+  flex: 1;
+}
+
+.record-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 15rpx 0;
+  border-bottom: 1px solid #eee;
+}
+
+.positive {
+  color: #4CAF50;
+}
+
+.negative {
+  color: #F44336;
+}
+</style>
