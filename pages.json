@@ -27,6 +27,27 @@
 		  "navigationBarTitleText": "我的",
 		  "backgroundColor": "#f0fff0"
 		}
+	  },
+	  {
+		"path": "pages/home/weight_detail",
+		"style": {
+		  "navigationBarTitleText": "体重详情",
+		  "backgroundColor": "#ffffff"
+		}
+	  },
+	  {
+		"path": "pages/home/body_fat_detail",
+		"style": {
+		  "navigationBarTitleText": "体脂详情",
+		  "backgroundColor": "#ffffff"
+		}
+	  },
+	  {
+		"path": "pages/home/training_detail",
+		"style": {
+		  "navigationBarTitleText": "锻炼详情",
+		  "backgroundColor": "#ffffff"
+		}
 	  }
 	],
 	"globalStyle": {
@@ -40,26 +61,26 @@
 		{
 		  "pagePath": "pages/home/index",
 		  "text": "主页",
-		  "iconPath": "assets/icons/home.png",
-		  "selectedIconPath": "assets/icons/home-active.png"
+		  "iconPath": "assets/icons/home.svg",
+		  "selectedIconPath": "assets/icons/home.svg"
 		},
 		{
 		  "pagePath": "pages/training/index",
 		  "text": "训练",
-		  "iconPath": "assets/icons/training.png",
-		  "selectedIconPath": "assets/icons/training-active.png"
+		  "iconPath": "assets/icons/training.svg",
+		  "selectedIconPath": "assets/icons/training.svg"
 		},
 		{
 		  "pagePath": "pages/recipe/index",
 		  "text": "食谱",
-		  "iconPath": "assets/icons/recipe.png",
-		  "selectedIconPath": "assets/icons/recipe-active.png"
+		  "iconPath": "assets/icons/recipe.svg",
+		  "selectedIconPath": "assets/icons/recipe.svg"
 		},
 		{
 		  "pagePath": "pages/user/index",
 		  "text": "我的",
-		  "iconPath": "assets/icons/user.png",
-		  "selectedIconPath": "assets/icons/user-active.png"
+		  "iconPath": "assets/icons/user.svg",
+		  "selectedIconPath": "assets/icons/user.svg"
 		}
 	  ]
 	},
