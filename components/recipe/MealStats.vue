@@ -48,10 +48,19 @@ const caloriePercentage = () => {
 <template>
   <view class="stats-container">
     <view class="header">
-      <view class="title">饮食记录</view>
+      <view class="title-container">
+        <view class="title-icon"></view>
+        <view class="title">饮食记录</view>
+      </view>
       <view class="calories-info" @click="updateTarget">
-        <text>热量目标：{{ calorieTarget }} kcal</text>
-        <text>今日摄入：{{ todayCalorieIntake }} kcal</text>
+        <view class="info-item">
+          <text class="info-label">热量目标</text>
+          <text class="info-value">{{ calorieTarget }} kcal</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">今日摄入</text>
+          <text class="info-value" :class="{ 'over-limit': caloriePercentage() > 100 }">{{ todayCalorieIntake }} kcal</text>
+        </view>
       </view>
     </view>
     
@@ -63,8 +72,9 @@ const caloriePercentage = () => {
           :style="{ width: `${caloriePercentage()}%`, backgroundColor: caloriePercentage() > 100 ? '#ff4d4f' : '#4CAF50' }"
         ></view>
       </view>
-      <view class="progress-text">
-        今日热量摄入进度: {{ caloriePercentage().toFixed(1) }}%
+      <view class="progress-text" :class="{ 'over-limit': caloriePercentage() > 100 }">
+        <text v-if="caloriePercentage() <= 100">今日热量摄入进度: {{ caloriePercentage().toFixed(1) }}%</text>
+        <text v-else>已超出目标: {{ (caloriePercentage() - 100).toFixed(1) }}%</text>
       </view>
     </view>
   </view>
@@ -78,33 +88,72 @@ const caloriePercentage = () => {
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   padding: 30rpx;
-  background-color: #f8f8f8;
-  border-bottom: 1px solid #eaeaea;
+  background: linear-gradient(to right, #f0f8ff, #e8f5e9);
+  border-radius: 15rpx 15rpx 0 0;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.title-container {
+  display: flex;
+  align-items: center;
+}
+
+.title-icon {
+  width: 40rpx;
+  height: 40rpx;
+  background-image: url('../../static/icons/recipe/title.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  margin-right: 15rpx;
 }
 
 .title {
   font-size: 36rpx;
   font-weight: bold;
   color: #333;
+  text-shadow: 1rpx 1rpx 3rpx rgba(0, 0, 0, 0.1);
 }
 
 .calories-info {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  background-color: rgba(255, 255, 255, 0.7);
+  padding: 10rpx 15rpx;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 5rpx rgba(0, 0, 0, 0.05);
 }
 
-.calories-info text {
-  font-size: 24rpx;
-  color: #666;
+.info-item {
+  display: flex;
+  align-items: center;
   margin-bottom: 5rpx;
 }
 
+.info-label {
+  font-size: 24rpx;
+  color: #666;
+  margin-right: 8rpx;
+}
+
+.info-value {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+.info-value.over-limit {
+  color: #ff4d4f;
+}
+
 .progress-container {
-  padding: 0 30rpx 20rpx;
+  padding: 15rpx 30rpx 20rpx;
   background-color: #f8f8f8;
+  border-radius: 0 0 15rpx 15rpx;
+  border: 1px solid #eaeaea;
+  border-top: none;
 }
 
 .progress-bar {
@@ -113,16 +162,25 @@ const caloriePercentage = () => {
   border-radius: 10rpx;
   overflow: hidden;
   margin-bottom: 10rpx;
+  box-shadow: inset 0 1rpx 3rpx rgba(0, 0, 0, 0.1);
 }
 
 .progress-fill {
   height: 100%;
   transition: width 0.3s;
+  background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent);
+  background-size: 40rpx 40rpx;
 }
 
 .progress-text {
   font-size: 24rpx;
   color: #666;
   text-align: right;
+  padding-top: 5rpx;
+}
+
+.progress-text.over-limit {
+  color: #ff4d4f;
+  font-weight: bold;
 }
 </style>

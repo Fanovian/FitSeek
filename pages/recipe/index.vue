@@ -96,6 +96,8 @@ onMounted(() => {
 <style scoped>
 .container {
   padding-bottom: 30rpx;
+  background-color: #f9f9f9;
+  min-height: 100vh;
 }
 
 .add-meal-section {
@@ -103,10 +105,15 @@ onMounted(() => {
 }
 
 .add-meal-btn {
-  background-color: #4CAF50;
+  background: linear-gradient(to right, #4CAF50, #8BC34A);
   color: white;
-  border-radius: 10rpx;
+  border-radius: 50rpx;
   font-size: 28rpx;
-  padding: 10rpx 30rpx;
+  padding: 15rpx 0;
+  box-shadow: 0 4rpx 12rpx rgba(76, 175, 80, 0.3);
+  letter-spacing: 2rpx;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
 }
 </style>

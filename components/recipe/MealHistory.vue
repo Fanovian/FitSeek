@@ -12,6 +12,11 @@ const props = defineProps({
   }
 });
 
+// 导入store以获取图标
+import { useRecipeStore } from '../../store/recipe.js';
+const recipeStore = useRecipeStore();
+const { getMealTypeIcon } = recipeStore;
+
 const emit = defineEmits(['delete']);
 
 // 删除记录
@@ -38,7 +43,10 @@ const deleteMeal = (date, id) => {
       
       <view v-for="meal in day.meals" :key="meal.id" class="food-item">
         <view class="food-info">
-          <text class="food-type">{{ meal.type }}</text>
+          <view class="food-type-container">
+            <image :src="getMealTypeIcon(meal.type)" class="food-type-icon"></image>
+            <text class="food-type">{{ meal.type }}</text>
+          </view>
           <text class="food-name">{{ meal.name }}</text>
           <text class="food-time">{{ meal.timestamp.split(' ')[1] }}</text>
         </view>
@@ -87,6 +95,30 @@ const deleteMeal = (date, id) => {
   justify-content: space-between;
   padding: 20rpx;
   border-bottom: 1px solid #f5f5f5;
+  border-radius: 8rpx;
+  margin: 0 2rpx;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.food-item:hover, .food-item:active {
+  background-color: #f9f9f9;
+}
+
+.food-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4rpx;
+  background: linear-gradient(to bottom, #4CAF50, #8BC34A);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.food-item:active::before {
+  opacity: 1;
 }
 
 .food-info {
@@ -100,10 +132,21 @@ const deleteMeal = (date, id) => {
   align-items: flex-end;
 }
 
+.food-type-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5rpx;
+}
+
+.food-type-icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 8rpx;
+}
+
 .food-type {
   font-size: 24rpx;
   color: #666;
-  margin-bottom: 5rpx;
 }
 
 .food-name {
@@ -128,9 +171,16 @@ const deleteMeal = (date, id) => {
   font-size: 24rpx;
   color: #ff4d4f;
   margin-top: 10rpx;
-  padding: 2rpx 10rpx;
-  border-radius: 4rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
   border: 1px solid #ff4d4f;
+  background-color: rgba(255, 77, 79, 0.05);
+  transition: all 0.3s;
+}
+
+.delete-btn:active {
+  background-color: rgba(255, 77, 79, 0.1);
+  color: #f00;
 }
 
 .daily-total {

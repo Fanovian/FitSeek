@@ -11,10 +11,10 @@ export const useRecipeStore = () => {
 
   // 饮食类型选项
   const mealTypes = [
-    { value: '早餐', label: '早餐' },
-    { value: '午餐', label: '午餐' },
-    { value: '晚餐', label: '晚餐' },
-    { value: '加餐', label: '加餐' }
+    { value: '早餐', label: '早餐', icon: '../../static/icons/recipe/breakfast.svg' },
+    { value: '午餐', label: '午餐', icon: '../../static/icons/recipe/lunch.svg' },
+    { value: '晚餐', label: '晚餐', icon: '../../static/icons/recipe/dinner.svg' },
+    { value: '加餐', label: '加餐', icon: '../../static/icons/recipe/addition.svg' }
   ];
 
   // 获取今天的日期字符串（YYYY-MM-DD格式）
@@ -161,6 +161,12 @@ export const useRecipeStore = () => {
     }
   };
 
+  // 根据饮食类型获取对应的图标
+  const getMealTypeIcon = (type) => {
+    const mealType = mealTypes.find(item => item.value === type);
+    return mealType ? mealType.icon : 'static/icons/recipe/addition.svg';
+  };
+
   return {
     calorieTarget,
     mealHistory,
@@ -171,6 +177,7 @@ export const useRecipeStore = () => {
     deleteMealRecord,
     updateCalorieTarget,
     getTodayDateString,
-    formatDateDisplay
+    formatDateDisplay,
+    getMealTypeIcon
   };
 };
