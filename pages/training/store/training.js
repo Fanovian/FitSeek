@@ -1,8 +1,12 @@
 // 锻炼记录相关的状态管理
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 // 创建一个可以在组件外部使用的响应式状态
 const workoutRecords = ref([]);
+// 用户的训练目标
+const trainingTarget = ref({
+  weeklyMinutes: 120  // 每周锻炼总时长目标（分钟）
+});
 
 // 锻炼类型选项
 const workoutTypes = [
@@ -101,13 +105,60 @@ export const useTrainingStore = () => {
     return false;
   };
   
+  // 获取用户的训练目标
+  const fetchTrainingTarget = () => {
+    // 实际项目中这里应该是API调用
+    // 这里使用Promise模拟异步请求
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // 返回当前保存的目标或默认值
+        resolve(trainingTarget.value);
+      }, 500);
+    });
+  };
+  
+  // 更新用户的训练目标
+  const updateTrainingTarget = (newTarget) => {
+    // 实际项目中应该发送请求到后端更新
+    // 然后再更新本地数据
+    if (newTarget.weeklyMinutes > 0) {
+      trainingTarget.value = {
+        weeklyMinutes: parseInt(newTarget.weeklyMinutes)
+      };
+      return Promise.resolve(trainingTarget.value);
+    }
+    return Promise.reject(new Error('训练目标必须为正数'));
+  };
+  
+  // 该函数已移除 - 不再计算每周锻炼次数
+  
+  // 计算本周已完成的锻炼时长（分钟）
+  const weeklyMinutesCompleted = computed(() => {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay()); // 设为本周第一天
+    startOfWeek.setHours(0, 0, 0, 0);
+    
+    // 筛选出本周的记录，并计算总时长
+    return workoutRecords.value
+      .filter(record => {
+        const recordDate = new Date(record.createdAt);
+        return recordDate >= startOfWeek;
+      })
+      .reduce((total, record) => total + parseInt(record.duration), 0);
+  });
+  
   return {
     workoutRecords,
     workoutTypes,
+    trainingTarget,
+    weeklyMinutesCompleted,
     fetchWorkoutRecords,
     addWorkoutRecord,
     deleteWorkoutRecord,
     getWorkoutTypeIcon,
-    formatDate
+    formatDate,
+    fetchTrainingTarget,
+    updateTrainingTarget
   };
 };
