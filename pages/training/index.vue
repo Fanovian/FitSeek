@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useTrainingStore } from '../../store/training.js';
 import WorkoutForm from '../../components/training/WorkoutForm.vue';
 import WorkoutRecords from '../../components/training/WorkoutRecords.vue';
+import TrainingStats from '../../components/training/TrainingStats.vue';
 
 // 使用训练记录状态管理
 const trainingStore = useTrainingStore();
@@ -50,11 +51,12 @@ onMounted(() => {
 
 <template>
   <view class="container">
-    <!-- 顶部按钮 -->
-    <view class="header">
-      <button class="add-btn" @click="showAddForm = !showAddForm">
-        {{ showAddForm ? '取消' : '+ 添加锻炼记录' }}
-      </button>
+    <!-- 顶部统计信息 -->
+    <training-stats />
+    
+    <!-- 添加记录按钮 -->
+    <view class="add-workout-section" v-if="!showAddForm">
+      <button class="add-workout-btn" @click="showAddForm = true">+ 添加锻炼记录</button>
     </view>
     
     <!-- 添加锻炼记录表单 -->
@@ -75,23 +77,26 @@ onMounted(() => {
 
 <style scoped>
 .container {
-  padding: 20rpx;
-  background-color: #f5f5f5;
+  padding-bottom: 30rpx;
+  background-color: #f9f9f9;
   min-height: 100vh;
 }
 
-.header {
-  padding: 20rpx 0;
-  display: flex;
-  justify-content: center;
+.add-workout-section {
+  margin: 30rpx 20rpx;
 }
 
-.add-btn {
-  background-color: #4CAF50;
+.add-workout-btn {
+  background: linear-gradient(to right, #4CAF50, #8BC34A);
   color: white;
-  border-radius: 30rpx;
+  border-radius: 50rpx;
   font-size: 28rpx;
-  padding: 10rpx 30rpx;
+  padding: 15rpx 0;
+  box-shadow: 0 4rpx 12rpx rgba(76, 175, 80, 0.3);
+  letter-spacing: 2rpx;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: none;
 }
 
 .form-container {

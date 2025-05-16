@@ -78,13 +78,13 @@ export const useTrainingStore = () => {
   const getWorkoutTypeIcon = (type) => {
     switch (type) {
       case 'cardio':
-        return 'static/icons/training/cardio.svg';
+        return '/static/icons/training/cardio.svg';
       case 'strength':
-        return 'static/icons/training/strength.svg';
+        return '/static/icons/training/strength.svg';
       case 'stretch':
-        return 'static/icons/training/stretch.svg';
+        return '/static/icons/training/stretch.svg';
       default:
-        return 'static/icons/training/other.svg';
+        return '/static/icons/training/other.svg';
     }
   };
 
