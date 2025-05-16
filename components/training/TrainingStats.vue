@@ -28,9 +28,8 @@ const weeklyTargetMinutes = ref(180); // 默认每周目标180分钟
 const updateTarget = () => {
   uni.showModal({
     title: '设置锻炼目标',
-    content: '请输入您的每周锻炼时长目标(分钟)',
     editable: true,
-    placeholderText: String(weeklyTargetMinutes.value),
+    placeholderText: `请输入每周锻炼时长目标(分钟), 当前: ${weeklyTargetMinutes.value}`,
     success: (res) => {
       if (res.confirm) {
         const newTarget = parseInt(res.content);
@@ -137,12 +136,18 @@ const progressPercentage = computed(() => {
   color: #fff;
   background: linear-gradient(to right, #4CAF50, #8BC34A);
   border-radius: 30rpx;
-  padding: 5rpx 20rpx;
+  padding: 6rpx 24rpx;
   border: none;
   box-shadow: 0 2rpx 6rpx rgba(76, 175, 80, 0.3);
-  line-height: 1.5;
+  line-height: 1.6;
   height: auto;
   margin-left: 10rpx;
+  transition: all 0.3s ease;
+}
+
+.goal-button:active {
+  transform: scale(0.95);
+  opacity: 0.9;
 }
 
 .training-info {
@@ -169,7 +174,7 @@ const progressPercentage = computed(() => {
 
 .info-value {
   font-size: 26rpx;
-  color: #333;
+  color: #4CAF50;
   font-weight: bold;
 }
 

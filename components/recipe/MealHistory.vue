@@ -163,7 +163,7 @@ const deleteMeal = (date, id) => {
 
 .food-calories {
   font-size: 26rpx;
-  color: #ff6b6b;
+  color: #4CAF50;
   font-weight: bold;
 }
 
@@ -192,7 +192,7 @@ const deleteMeal = (date, id) => {
 .daily-total text {
   font-size: 28rpx;
   font-weight: bold;
-  color: #ff6b6b;
+  color: #4CAF50;
 }
 
 .empty-records {

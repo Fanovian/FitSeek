@@ -18,9 +18,8 @@ const emit = defineEmits(['updateTarget']);
 const updateTarget = () => {
   uni.showModal({
     title: '设置热量目标',
-    content: '请输入您的每日热量目标(kcal)',
     editable: true,
-    placeholderText: String(props.calorieTarget),
+    placeholderText: `请输入每日热量目标(kcal), 当前: ${props.calorieTarget}`,
     success: (res) => {
       if (res.confirm) {
         const newTarget = parseInt(res.content);
@@ -124,12 +123,18 @@ const caloriePercentage = () => {
   color: #fff;
   background: linear-gradient(to right, #4CAF50, #8BC34A);
   border-radius: 30rpx;
-  padding: 5rpx 20rpx;
+  padding: 6rpx 24rpx;
   border: none;
   box-shadow: 0 2rpx 6rpx rgba(76, 175, 80, 0.3);
-  line-height: 1.5;
+  line-height: 1.6;
   height: auto;
   margin-left: 10rpx;
+  transition: all 0.3s ease;
+}
+
+.goal-button:active {
+  transform: scale(0.95);
+  opacity: 0.9;
 }
 
 .calories-info {
@@ -156,7 +161,7 @@ const caloriePercentage = () => {
 
 .info-value {
   font-size: 26rpx;
-  color: #333;
+  color: #4CAF50;
   font-weight: bold;
 }
 
