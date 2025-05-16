@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useTrainingStore } from '../../store/training.js';
-import WorkoutForm from '../../components/training/WorkoutForm.vue';
-import WorkoutRecords from '../../components/training/WorkoutRecords.vue';
-import TrainingStats from '../../components/training/TrainingStats.vue';
+import { useTrainingStore } from './store/training.js';
+import WorkoutForm from './components/WorkoutForm.vue';
+import WorkoutRecords from './components/WorkoutRecords.vue';
+import TrainingStats from './components/TrainingStats.vue';
 
 // 使用训练记录状态管理
 const trainingStore = useTrainingStore();

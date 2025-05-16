@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRecipeStore } from '../../store/recipe.js';
-import MealForm from '../../components/recipe/MealForm.vue';
-import MealHistory from '../../components/recipe/MealHistory.vue';
-import MealStats from '../../components/recipe/MealStats.vue';
+import { useRecipeStore } from './store/recipe.js';
+import MealForm from './components/MealForm.vue';
+import MealHistory from './components/MealHistory.vue';
+import MealStats from './components/MealStats.vue';
 
 // 使用饮食记录状态管理
 const recipeStore = useRecipeStore();

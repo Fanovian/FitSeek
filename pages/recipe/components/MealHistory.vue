@@ -13,7 +13,7 @@ const props = defineProps({
 });
 
 // 导入store以获取图标
-import { useRecipeStore } from '../../store/recipe.js';
+import { useRecipeStore } from '../store/recipe.js';
 const recipeStore = useRecipeStore();
 const { getMealTypeIcon } = recipeStore;
 

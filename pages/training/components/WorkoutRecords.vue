@@ -1,6 +1,6 @@
 <script setup>
 import { defineProps, computed } from 'vue';
-import { useTrainingStore } from '../../store/training.js';
+import { useTrainingStore } from '../store/training.js';
 
 const props = defineProps({
   records: {

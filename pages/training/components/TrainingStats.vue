@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useTrainingStore } from '../../store/training.js';
+import { useTrainingStore } from '../store/training.js';
 
 // 使用训练记录状态管理
 const trainingStore = useTrainingStore();
