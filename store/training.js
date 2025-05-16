@@ -2,16 +2,17 @@
 import { ref } from 'vue';
 
 // 创建一个可以在组件外部使用的响应式状态
+const workoutRecords = ref([]);
+
+// 锻炼类型选项
+const workoutTypes = [
+  { value: 'cardio', label: '有氧' },
+  { value: 'strength', label: '无氧' },
+  { value: 'stretch', label: '拉伸' },
+  { value: 'other', label: '其他' }
+];
+
 export const useTrainingStore = () => {
-  const workoutRecords = ref([]);
-  
-  // 锻炼类型选项
-  const workoutTypes = [
-    { value: 'cardio', label: '有氧' },
-    { value: 'strength', label: '无氧' },
-    { value: 'stretch', label: '拉伸' },
-    { value: 'other', label: '其他' }
-  ];
 
   // 从后端获取锻炼记录
   const fetchWorkoutRecords = () => {
