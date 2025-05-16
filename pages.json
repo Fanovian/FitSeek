@@ -61,26 +61,26 @@
 		{
 		  "pagePath": "pages/home/index",
 		  "text": "主页",
-		  "iconPath": "assets/icons/home.svg",
-		  "selectedIconPath": "assets/icons/home.svg"
+		  "iconPath": "static/icons/tabBar/home.svg",
+		  "selectedIconPath": "static/icons/tabBar/home.svg"
 		},
 		{
 		  "pagePath": "pages/training/index",
 		  "text": "训练",
-		  "iconPath": "assets/icons/training.svg",
-		  "selectedIconPath": "assets/icons/training.svg"
+		  "iconPath": "static/icons/tabBar/training.svg",
+		  "selectedIconPath": "static/icons/tabBar/training.svg"
 		},
 		{
 		  "pagePath": "pages/recipe/index",
 		  "text": "食谱",
-		  "iconPath": "assets/icons/recipe.svg",
-		  "selectedIconPath": "assets/icons/recipe.svg"
+		  "iconPath": "static/icons/tabBar/recipe.svg",
+		  "selectedIconPath": "static/icons/tabBar/recipe.svg"
 		},
 		{
 		  "pagePath": "pages/user/index",
 		  "text": "我的",
-		  "iconPath": "assets/icons/user.svg",
-		  "selectedIconPath": "assets/icons/user.svg"
+		  "iconPath": "static/icons/tabBar/user.svg",
+		  "selectedIconPath": "static/icons/tabBar/user.svg"
 		}
 	  ]
 	},
