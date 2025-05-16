@@ -1,6 +1,13 @@
 {
 	"pages": [
 	  {
+		"path": "pages/login/index",
+		"style": {
+		"navigationBarTitleText": "登录",
+		"navigationStyle": "default"
+		}
+	  },
+	  {
 		"path": "pages/home/index",
 		"style": {
 		  "navigationBarTitleText": "健康助手",
