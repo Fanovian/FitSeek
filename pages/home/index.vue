@@ -104,8 +104,8 @@ export default {
 
 /* 顶部信息栏样式 */
 .top-section {
-  height: 200rpx; /* 固定高度 */
-  background-color: #4CAF50;
+  height: 400rpx; /* 固定高度 */
+  background-color: #087457;
   display: flex;
   padding: 20rpx;
   box-sizing: border-box;
@@ -145,7 +145,7 @@ export default {
 /* 数据卡片容器 */
 .card-container {
   flex: 1; /* 占满剩余空间 */
-  background: linear-gradient(to bottom, #4CAF50, #ffffff);
+  background: linear-gradient(to bottom, #087457, #ffffff);
   padding: 20rpx;
   box-sizing: border-box;
   overflow-y: auto; /* 启用滚动 */
