@@ -65,8 +65,9 @@ const progressPercentage = computed(() => {
       <view class="title-container">
         <view class="title-icon"></view>
         <view class="title">锻炼记录</view>
+        <button class="goal-button" @click="updateTarget">设置目标</button>
       </view>
-      <view class="training-info" @click="updateTarget">
+      <view class="training-info">
         <view class="info-item">
           <text class="info-label">每周目标</text>
           <text class="info-value">{{ weeklyTargetMinutes }} 分钟</text>
@@ -111,6 +112,7 @@ const progressPercentage = computed(() => {
 .title-container {
   display: flex;
   align-items: center;
+  flex: 1;
 }
 
 .title-icon {
@@ -127,6 +129,20 @@ const progressPercentage = computed(() => {
   font-weight: bold;
   color: #333;
   text-shadow: 1rpx 1rpx 3rpx rgba(0, 0, 0, 0.1);
+  margin-right: 20rpx;
+}
+
+.goal-button {
+  font-size: 24rpx;
+  color: #fff;
+  background: linear-gradient(to right, #4CAF50, #8BC34A);
+  border-radius: 30rpx;
+  padding: 5rpx 20rpx;
+  border: none;
+  box-shadow: 0 2rpx 6rpx rgba(76, 175, 80, 0.3);
+  line-height: 1.5;
+  height: auto;
+  margin-left: 10rpx;
 }
 
 .training-info {
