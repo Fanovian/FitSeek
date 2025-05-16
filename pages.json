@@ -27,6 +27,27 @@
 		  "navigationBarTitleText": "我的",
 		  "backgroundColor": "#f0fff0"
 		}
+	  },
+	  {
+		"path": "pages/home/weight_detail",
+		"style": {
+		  "navigationBarTitleText": "体重详情",
+		  "backgroundColor": "#ffffff"
+		}
+	  },
+	  {
+		"path": "pages/home/body_fat_detail",
+		"style": {
+		  "navigationBarTitleText": "体脂详情",
+		  "backgroundColor": "#ffffff"
+		}
+	  },
+	  {
+		"path": "pages/home/training_detail",
+		"style": {
+		  "navigationBarTitleText": "锻炼详情",
+		  "backgroundColor": "#ffffff"
+		}
 	  }
 	],
 	"globalStyle": {

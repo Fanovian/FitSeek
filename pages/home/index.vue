@@ -1,55 +1,159 @@
-<script setup>
-import { ref } from 'vue'
-const currentWeight = ref(75)
-const targetWeight = ref(68)
-const recentTraining = ref([
-  { id: 1, name: '深蹲', count: '3组×15次' },
-  { id: 2, name: '跑步', count: '30分钟' }
-])
-</script>
-
+<!-- pages/home/index.vue -->
 <template>
   <view class="container">
-    <!-- 体重显示 -->
-    <view class="weight-card">
-      <text>当前体重：{{ currentWeight }}kg</text>
-      <text>目标体重：{{ targetWeight }}kg</text>
-    </view>
-
-    <!-- 食谱推荐 -->
-    <view class="section">
-      <text class="section-title">推荐食谱</text>
-      <view class="recipe-recommend">
-        <!-- 示例数据可替换为动态获取 -->
-        <text>燕麦牛奶 | 鸡胸肉沙拉</text>
+    <!-- 顶部信息栏 -->
+    <view class="top-section">
+      <view class="target-info">
+        <text class="label">距离目标</text>
+        <text class="value">5.2kg</text>
+      </view>
+      
+      <view class="current-weight">
+        <text class="weight">65.0</text>
+        <text class="unit">(72.5)</text>
+      </view>
+      
+      <view class="bmi-info">
+        <text class="label">BMI</text>
+        <text class="value">21.8</text>
       </view>
     </view>
 
-    <!-- 训练记录 -->
-    <view class="section">
-      <text class="section-title">最近训练</text>
-      <view v-for="item in recentTraining" :key="item.id" class="training-item">
-        {{ item.name }} - {{ item.count }}
+    <!-- 数据卡片容器 -->
+    <scroll-view 
+      scroll-y 
+      class="card-container"
+      :scroll-with-animation="true"
+    >
+      <view class="card-list">
+        <!-- 体重记录 -->
+        <WeightCard 
+          :records="weightRecords"
+        />
+        <!-- 体脂记录 -->
+        <BodyFatCard 
+          :records="bodyFatRecords"
+        />
+        <!-- 锻炼记录 -->
+        <TrainingCard 
+          :records="trainingRecords"
+        />
       </view>
-    </view>
+    </scroll-view>
   </view>
 </template>
 
+<script>
+import WeightCard from '@/pages/home/components/WeightCard.vue';
+import BodyFatCard from '@/pages/home/components/BodyFatCard.vue';
+import TrainingCard from '@/pages/home/components/TrainingCard.vue';
+
+export default {
+  components: {
+    WeightCard,
+    BodyFatCard,
+    TrainingCard,
+  },
+  data() {
+    return {
+      weightRecords: [
+        { date: '2023-09-09', value: '64.8kg', change: '-0.2kg' },
+        { date: '2023-09-08', value: '65.0kg', change: '+0.3kg' },
+        { date: '2023-09-07', value: '64.7kg', change: '-0.2kg' },
+        { date: '2023-09-06', value: '64.9kg', change: '+0.3kg' },
+        { date: '2023-09-05', value: '64.6kg', change: '-0.2kg' },
+        { date: '2023-09-04', value: '64.8kg', change: '+0.3kg' },
+        { date: '2023-09-03', value: '64.5kg', change: '-0.2kg' },
+        { date: '2023-09-02', value: '64.7kg', change: '-0.3kg' },
+        { date: '2023-09-01', value: '65.0kg', change: '+0.3kg' },
+      ],
+      bodyFatRecords: [
+        { date: '2023-09-09', value: '22.1%', change: '-0.1%' },
+        { date: '2023-09-08', value: '22.2%', change: '+0.2%' },
+        { date: '2023-09-07', value: '22.0%', change: '-0.3%' },
+        { date: '2023-09-06', value: '22.3%', change: '+0.2%' },
+        { date: '2023-09-05', value: '22.1%', change: '-0.1%' },
+        { date: '2023-09-04', value: '22.2%', change: '+0.2%' },
+        { date: '2023-09-03', value: '22.0%', change: '-0.3%' },
+        { date: '2023-09-02', value: '22.3%', change: '+0.2%' },
+        { date: '2023-09-01', value: '22.1%', change: '-0.5%' },
+      ],
+      trainingRecords: [
+        { date: '2023-09-09', duration: '80min', change: '+5min' },
+        { date: '2023-09-08', duration: '75min', change: '+5min' },
+        { date: '2023-09-07', duration: '70min', change: '+5min' },
+        { date: '2023-09-06', duration: '65min', change: '+5min' },
+        { date: '2023-09-05', duration: '60min', change: '+5min' },
+        { date: '2023-09-04', duration: '55min', change: '+5min' },
+        { date: '2023-09-03', duration: '50min', change: '+10min' },
+        { date: '2023-09-02', duration: '40min', change: '-5min' },
+        { date: '2023-09-01', duration: '45min', change: '+5min' },
+      ],
+    };
+  },
+};
+</script>
+
 <style scoped>
 .container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden; /* 防止页面整体滚动 */
+}
+
+/* 顶部信息栏样式 */
+.top-section {
+  height: 200rpx; /* 固定高度 */
+  background-color: #4CAF50;
+  display: flex;
   padding: 20rpx;
+  box-sizing: border-box;
+  position: sticky; /* 固定顶部 */
+  top: 0;
+  z-index: 10;
 }
-.weight-card {
-  background: #e0ffe0;
-  padding: 40rpx;
-  margin-bottom: 30rpx;
-  text-align: center;
+
+.target-info, .bmi-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
 }
-.section-title {
+
+.current-weight {
+  flex: 4;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+.weight {
+  font-size: 48px;
   font-weight: bold;
-  margin-bottom: 20rpx;
 }
-.recipe-recommend, .training-item {
-  margin: 15rpx 0;
+
+.unit {
+  font-size: 24px;
+  margin-left: 10px;
+}
+
+/* 数据卡片容器 */
+.card-container {
+  flex: 1; /* 占满剩余空间 */
+  background: linear-gradient(to bottom, #4CAF50, #ffffff);
+  padding: 20rpx;
+  box-sizing: border-box;
+  overflow-y: auto; /* 启用滚动 */
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
 }
 </style>
