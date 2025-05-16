@@ -91,6 +91,65 @@ export default {
       ],
     };
   },
+  methods: {
+    // 获取体重记录
+    async fetchWeightRecords() {
+      try {
+        const res = await uni.request({
+          url: 'http://123.206.217.44:3000/api/weight/records',
+          method: 'GET',
+          header: {
+            Authorization: uni.getStorageSync('jwtToken') || ''
+          }
+        });
+        if (res.data && res.data.success) {
+          this.weightRecords = res.data.records;
+        }
+      } catch (e) {
+        // 网络异常等可忽略，保留示例数据
+      }
+    },
+    // 获取体脂记录
+    async fetchBodyFatRecords() {
+      try {
+        const res = await uni.request({
+          url: 'http://123.206.217.44:3000/api/bodyfat/records',
+          method: 'GET',
+          header: {
+            Authorization: uni.getStorageSync('jwtToken') || ''
+          }
+        });
+        if (res.data && res.data.success) {
+          this.bodyFatRecords = res.data.records;
+        }
+      } catch (e) {
+        // 网络异常等可忽略，保留示例数据
+      }
+    },
+    // 获取锻炼记录
+    async fetchTrainingRecords() {
+      try {
+        const res = await uni.request({
+          url: 'http://123.206.217.44:3000/api/training/records',
+          method: 'GET',
+          header: {
+            Authorization: uni.getStorageSync('jwtToken') || ''
+          }
+        });
+        if (res.data && res.data.success) {
+          this.trainingRecords = res.data.records;
+        }
+      } catch (e) {
+        // 网络异常等可忽略，保留示例数据
+      }
+    }
+  },
+  created() {
+    // 如需启用接口数据，取消注释即可
+    // this.fetchWeightRecords();
+    // this.fetchBodyFatRecords();
+    // this.fetchTrainingRecords();
+  }
 };
 </script>
 
@@ -105,7 +164,7 @@ export default {
 /* 顶部信息栏样式 */
 .top-section {
   height: 400rpx; /* 固定高度 */
-  background-color: #087457;
+  background-color: #f0fff0;
   display: flex;
   padding: 20rpx;
   box-sizing: border-box;
@@ -120,7 +179,7 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: white;
+  color: #388e3c;
 }
 
 .current-weight {
@@ -129,7 +188,7 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: white;
+  color: #388e3c;
 }
 
 .weight {
@@ -145,7 +204,7 @@ export default {
 /* 数据卡片容器 */
 .card-container {
   flex: 1; /* 占满剩余空间 */
-  background: linear-gradient(to bottom, #087457, #ffffff);
+  background: linear-gradient(to bottom, #f0fff0, #ffffff);
   padding: 20rpx;
   box-sizing: border-box;
   overflow-y: auto; /* 启用滚动 */
