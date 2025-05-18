@@ -76,7 +76,7 @@ export default {
       }
       try {
         const response = await uni.request({
-          url: 'http://123.206.217.44:3000/api/auth/login',
+          url: 'https://api.fanovian.cc:3000/api/auth/login',
           method: 'POST',
           data: {
             type: parseInt(loginType.value),
@@ -106,7 +106,7 @@ export default {
       }
       try {
         const response = await uni.request({
-          url: 'http://123.206.217.44:3000/api/auth/register',
+          url: 'https://api.fanovian.cc:3000/api/auth/register',
           method: 'POST',
           data: {
             tel: registerTel.value,

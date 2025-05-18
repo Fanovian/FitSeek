@@ -96,7 +96,7 @@ export default {
     async fetchWeightRecords() {
       try {
         const res = await uni.request({
-          url: 'http://123.206.217.44:3000/api/weight/records',
+          url: 'https://api.fanovian.cc:3000/api/weight/records',
           method: 'GET',
           header: {
             Authorization: uni.getStorageSync('jwtToken') || ''
@@ -113,7 +113,7 @@ export default {
     async fetchBodyFatRecords() {
       try {
         const res = await uni.request({
-          url: 'http://123.206.217.44:3000/api/bodyfat/records',
+          url: 'https://api.fanovian.cc:3000/api/bodyfat/records',
           method: 'GET',
           header: {
             Authorization: uni.getStorageSync('jwtToken') || ''
@@ -130,7 +130,7 @@ export default {
     async fetchTrainingRecords() {
       try {
         const res = await uni.request({
-          url: 'http://123.206.217.44:3000/api/training/records',
+          url: 'https://api.fanovian.cc:3000/api/training/records',
           method: 'GET',
           header: {
             Authorization: uni.getStorageSync('jwtToken') || ''
