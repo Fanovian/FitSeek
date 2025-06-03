@@ -55,6 +55,48 @@
 		  "navigationBarTitleText": "锻炼详情",
 		  "backgroundColor": "#ffffff"
 		}
+	  },
+	  {
+		"path": "pages/home/blood_oxygen_detail",
+		"style": {
+		  "navigationBarTitleText": "血氧详情",
+		  "backgroundColor": "#ffffff"
+		}
+	  },
+	  {
+		"path": "pages/home/heart_rate_detail",
+		"style": {
+		  "navigationBarTitleText": "心率详情",
+		  "backgroundColor": "#ffffff"
+		}
+	  },
+	  {
+		"path": "pages/home/announcement_list",
+		"style": {
+		  "navigationBarTitleText": "公告列表",
+		  "backgroundColor": "#f0fff0"
+		}
+	  },
+	  {
+		"path": "pages/home/announcement_detail",
+		"style": {
+		  "navigationBarTitleText": "公告详情",
+		  "backgroundColor": "#f0fff0"
+		}
+	  },
+	  {
+		"path": "pages/home/article_list",
+		"style": {
+		  "navigationBarTitleText": "文章列表",
+		  "backgroundColor": "#f0fff0"
+		}
+	  },
+	  {
+		"path": "pages/home/article_detail",
+		"style": {
+		  "navigationBarTitleText": "文章详情",
+		  "backgroundColor": "#f0fff0"
+		}
 	  }
 	],
 	"globalStyle": {

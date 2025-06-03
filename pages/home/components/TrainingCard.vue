@@ -8,6 +8,7 @@
           <text :class="{ positive: item.change.startsWith('+'), negative: item.change.startsWith('-') }">
             {{ item.change }}
           </text>
+          <text class="type-label">{{ typeMap[item.type] || '综合' }}</text>
         </view>
       </view>
     </view>
@@ -24,6 +25,14 @@ export default {
   computed: {
     recentRecords() {
       return this.records.slice(0, 3);
+    },
+    typeMap() {
+      return {
+        aerobic: '有氧',
+        anaerobic: '无氧',
+        streching: '拉伸',
+        other: '其他'
+      };
     },
   },
   methods: {
@@ -62,8 +71,18 @@ export default {
   .record-line {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    gap: 10rpx;
   }
   
   .positive { color: #4CAF50; }
   .negative { color: #F44336; }
+  .type-label {
+    font-size: 22rpx;
+    color: #388e3c;
+    background: #e8f5e9;
+    border-radius: 8rpx;
+    padding: 2rpx 10rpx;
+    margin-left: 6rpx;
+  }
   </style>

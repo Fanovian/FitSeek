@@ -69,14 +69,14 @@ export default {
   data() {
     const sysInfo = uni.getSystemInfoSync();
     const screenWidth = sysInfo.windowWidth || 375;
-    const basePadding = 40;
+    const basePadding = 16;
     return {
       detailedRecords: [],
       screenWidth,
       svgWidth: 0,
-      svgHeight: Math.max(180, Math.floor(screenWidth * 0.5)),
+      svgHeight: Math.max(160, Math.floor(screenWidth * 0.45)),
       svgScrollWidth: 0,
-      labelWidth: 40,
+      labelWidth: 48,
       basePadding,
     };
   },
@@ -90,19 +90,19 @@ export default {
     chartPoints() {
       if (!this.detailedRecords.length) return [];
       const n = this.detailedRecords.length;
-      const minGap = this.labelWidth;
+      const minGap = this.labelWidth + 8;
       const maxGap = (this.screenWidth - this.basePadding * 2) / Math.max(n - 1, 1);
-      const gap = Math.max(minGap, maxGap);
+      const gap = Math.max(minGap, Math.min(maxGap, 80));
       this.svgWidth = gap;
       const w = gap * (n - 1) || gap;
       const h = this.svgHeight;
       const yArr = this.detailedRecords.map(item => parseFloat(item.value));
       const minY = Math.min(...yArr), maxY = Math.max(...yArr);
       const rangeY = maxY - minY || 1;
-      const paddingTop = 20;
-      const paddingBottom = 20;
+      const paddingTop = 24;
+      const paddingBottom = 28;
       const chartHeight = h - paddingTop - paddingBottom;
-      this.$data.svgScrollWidth = w + this.basePadding * 2;
+      this.$data.svgScrollWidth = Math.max(w + this.basePadding * 2, this.screenWidth);
       return yArr.map((y, i) => [
         gap * i + this.basePadding,
         paddingTop + ((maxY - y) / rangeY) * chartHeight
@@ -120,11 +120,11 @@ export default {
   
 <style scoped>
 .detail-container {
-  padding: 20rpx;
+  padding: 16rpx;
 }
 .chart-container {
-  height: 400rpx;
-  background-color: #f5f5f5;
+  min-height: 320rpx;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -132,12 +132,13 @@ export default {
   margin-bottom: 20rpx;
 }
 .simple-line-chart-scroll {
-  width: 100%;
+  width: 100vw;
   overflow-x: auto;
 }
 .simple-line-chart {
   position: relative;
   height: 220px;
+  min-width: 100vw;
 }
 .trend {
   margin-top: 10rpx;
@@ -173,5 +174,8 @@ export default {
   font-size: 18rpx;
   color: #888;
   transform: translateX(-50%);
+  min-width: 40px;
+  max-width: 60px;
+  white-space: nowrap;
 }
 </style>

@@ -50,7 +50,7 @@
       <view class="record-list">
         <view v-for="(item, index) in detailedRecords" :key="index" class="record-item">
           <text>{{ item.date }} - {{ item.duration }}</text>
-          <text>{{ item.type || '综合训练' }}</text>
+          <text class="type-label">{{ typeMap[item.type] || '综合训练' }}</text>
         </view>
       </view>
     </view>
@@ -67,14 +67,14 @@ export default {
   data() {
     const sysInfo = uni.getSystemInfoSync();
     const screenWidth = sysInfo.windowWidth || 375;
-    const basePadding = 40;
+    const basePadding = 16; // 缩小padding，适配移动端
     return {
       detailedRecords: [],
       screenWidth,
-      svgWidth: 0, // 动态计算
-      svgHeight: Math.max(180, Math.floor(screenWidth * 0.5)), // 高度自适应
-      svgScrollWidth: 0, // 动态计算
-      labelWidth: 40,
+      svgWidth: 0,
+      svgHeight: Math.max(160, Math.floor(screenWidth * 0.45)), // 高度略减
+      svgScrollWidth: 0,
+      labelWidth: 48, // 增大label宽度，防止重叠
       basePadding,
     };
   },
@@ -88,20 +88,20 @@ export default {
     chartPoints() {
       if (!this.detailedRecords.length) return [];
       const n = this.detailedRecords.length;
-      // 计算点间距，最小为labelWidth，最大为(屏幕宽度-basePadding*2)/(n-1)
-      const minGap = this.labelWidth;
+      // 计算点间距，最小为labelWidth+8，最大为(屏幕宽度-basePadding*2)/(n-1)
+      const minGap = this.labelWidth + 8;
       const maxGap = (this.screenWidth - this.basePadding * 2) / Math.max(n - 1, 1);
-      const gap = Math.max(minGap, maxGap);
+      const gap = Math.max(minGap, Math.min(maxGap, 80)); // 限制最大gap，防止过大
       this.svgWidth = gap;
       const w = gap * (n - 1) || gap;
       const h = this.svgHeight;
       const yArr = this.detailedRecords.map(item => parseInt(item.duration));
       const minY = Math.min(...yArr), maxY = Math.max(...yArr);
       const rangeY = maxY - minY || 1;
-      const paddingTop = 20;
-      const paddingBottom = 20;
+      const paddingTop = 24; // 增加顶部padding
+      const paddingBottom = 28; // 增加底部padding
       const chartHeight = h - paddingTop - paddingBottom;
-      this.$data.svgScrollWidth = w + this.basePadding * 2;
+      this.$data.svgScrollWidth = Math.max(w + this.basePadding * 2, this.screenWidth); // 至少等于屏幕宽
       return yArr.map((y, i) => [
         gap * i + this.basePadding,
         paddingTop + ((maxY - y) / rangeY) * chartHeight
@@ -109,6 +109,14 @@ export default {
     },
     chartPointsStr() {
       return this.chartPoints.map(pt => pt.join(',')).join(' ');
+    },
+    typeMap() {
+      return {
+        aerobic: '有氧',
+        anaerobic: '无氧',
+        streching: '拉伸',
+        other: '其他'
+      };
     }
   },
   created() {
@@ -119,11 +127,11 @@ export default {
 
 <style scoped>
 .detail-container {
-  padding: 20rpx;
+  padding: 16rpx;
 }
 .chart-container {
-  height: 400rpx;
-  background-color: #f5f5f5;
+  min-height: 320rpx;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -131,12 +139,13 @@ export default {
   margin-bottom: 20rpx;
 }
 .simple-line-chart-scroll {
-  width: 100%;
+  width: 100vw;
   overflow-x: auto;
 }
 .simple-line-chart {
   position: relative;
   height: 220px;
+  min-width: 100vw;
 }
 .trend {
   margin-top: 10rpx;
@@ -148,8 +157,18 @@ export default {
 .record-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 15rpx 0;
   border-bottom: 1px solid #eee;
+  gap: 10rpx;
+}
+.type-label {
+  font-size: 22rpx;
+  color: #388e3c;
+  background: #e8f5e9;
+  border-radius: 8rpx;
+  padding: 2rpx 10rpx;
+  margin-left: 6rpx;
 }
 .positive {
   color: #4CAF50;
@@ -170,7 +189,10 @@ export default {
   top: 0;
   text-align: center;
   font-size: 18rpx;
-  color: #888;
+  color: #ffffff00;
   transform: translateX(-50%);
+  min-width: 40px;
+  max-width: 60px;
+  white-space: nowrap;
 }
 </style>
