@@ -60,29 +60,6 @@ import AnnouncementCard from '@/pages/home/components/AnnouncementCard.vue';
 import ArticleCard from '@/pages/home/components/ArticleCard.vue';
 import errorReport from '@/utils/errorReport.js';
 
-// 简单异常自动上报方法，建议提取为 util 并在每个页面引用
-function errorReport(err, info = '') {
-  try {
-    const payload = {
-      message: err && err.message ? err.message : String(err),
-      stack: err && err.stack ? err.stack : '',
-      info,
-      page: '/pages/home/index',
-      time: new Date().toISOString(),
-      ua: typeof navigator !== 'undefined' ? navigator.userAgent : ''
-    };
-    // 推荐：上报到后端日志接口
-    uni.request({
-      url: 'https://api.fanovian.cc:3000/api/log/error',
-      method: 'POST',
-      data: payload,
-      header: { 'Content-Type': 'application/json' }
-    });
-  } catch (e) {
-    // 上报失败可忽略
-  }
-}
-
 export default {
   components: {
     WeightCard,
