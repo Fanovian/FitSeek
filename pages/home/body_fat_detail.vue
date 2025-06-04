@@ -1,83 +1,61 @@
 <!-- pages/body-fat-detail/index.vue -->
 <template>
-    <view class="detail-container">
-      <view class="chart-container">
-        <text>体脂变化趋势图表</text>
-        <scroll-view scroll-x class="simple-line-chart-scroll">
-          <view
-            class="simple-line-chart"
-            :style="{ width: svgScrollWidth + 'px', height: svgHeight + 'px' }"
-          >
-            <svg
-              v-if="chartPoints.length > 1"
-              :width="svgScrollWidth"
-              :height="svgHeight"
-            >
-              <polyline
-                :points="chartPointsStr"
-                fill="none"
-                stroke="#4CAF50"
-                stroke-width="3"
-              />
-              <circle
-                v-for="(pt, idx) in chartPoints"
-                :key="idx"
-                :cx="pt[0]"
-                :cy="pt[1]"
-                r="5"
-                fill="#4CAF50"
-              />
-            </svg>
-            <view v-else style="color: #aaa; text-align: center; padding: 30rpx;">暂无足够数据</view>
-            <view class="chart-x-labels" v-if="chartPoints.length > 1" :style="{ width: svgScrollWidth + 'px' }">
-              <view
-                v-for="(item, idx) in detailedRecords"
-                :key="idx"
-                class="chart-x-label"
-                :style="{ left: (chartPoints[idx]?.[0] || 0) + 'px', width: labelWidth + 'px' }"
-              >
-                {{ item.date.slice(5) }}
-              </view>
-            </view>
-          </view>
-        </scroll-view>
-        <view class="trend">
-          <text v-if="trend > 0" class="positive">总体趋势：+{{ trend }}%</text>
-          <text v-else-if="trend < 0" class="negative">总体趋势：{{ trend }}%</text>
-          <text v-else>总体趋势：无变化</text>
-        </view>
+  <view class="detail-container">
+    <view class="chart-container">
+      <text>体脂变化趋势图表</text>
+      <qiun-data-charts
+        type="line"
+        :opts="{ color: ['#4CAF50'], legend: false, xAxis: { disableGrid: true }, yAxis: { min: null, gridType: 'dash', splitNumber: 4 }, extra: { line: { type: 'curve', width: 3 } } }"
+        :chartData="chartData"
+        :canvas2d="false"
+        :ontouch="false"
+        :width="screenWidth"
+        :height="svgHeight"
+      />
+      <view class="trend">
+        <text v-if="trend > 0" class="positive">总体趋势：+{{ trend }}%</text>
+        <text v-else-if="trend < 0" class="negative">总体趋势：{{ trend }}%</text>
+        <text v-else>总体趋势：无变化</text>
       </view>
-      <view class="record-list">
-        <view v-for="(item, index) in detailedRecords" :key="index" class="record-item">
-          <text>{{ item.date }} - {{ item.value }}</text>
-          <text :class="{ positive: item.change.startsWith('+'), negative: item.change.startsWith('-') }">
-            {{ item.change }}
-          </text>
-        </view>
+      <view class="chart-x-axis">
+        <text v-for="(cat, idx) in chartData.categories" :key="idx" class="x-label">{{ cat }}</text>
       </view>
     </view>
+    <view class="record-list">
+      <view v-for="(item, index) in detailedRecords" :key="index" class="record-item">
+        <text>{{ item.date }} - {{ item.value }}%</text>
+        <text :class="{ positive: item.change.startsWith('+'), negative: item.change.startsWith('-') }">
+          {{ item.change }}
+        </text>
+      </view>
+    </view>
+  </view>
 </template>
-  
+
 <script>
+import QiunDataCharts from '@/uni_modules/qiun-data-charts/components/qiun-data-charts/qiun-data-charts.vue';
+import errorReport from '@/utils/errorReport.js';
 export default {
-  props: {
-    data: {
-      type: String,
-      default: '{}'
-    }
-  },
+  components: { 'qiun-data-charts': QiunDataCharts },
   data() {
     const sysInfo = uni.getSystemInfoSync();
     const screenWidth = sysInfo.windowWidth || 375;
-    const basePadding = 16;
     return {
       detailedRecords: [],
       screenWidth,
-      svgWidth: 0,
       svgHeight: Math.max(160, Math.floor(screenWidth * 0.45)),
-      svgScrollWidth: 0,
-      labelWidth: 48,
-      basePadding,
+      chartData: { categories: [], series: [] },
+      sampleRecords: [
+        { date: '2023-09-09', value: '22.1', change: '-0.1%' },
+        { date: '2023-09-08', value: '22.2', change: '+0.2%' },
+        { date: '2023-09-07', value: '22.0', change: '-0.3%' },
+        { date: '2023-09-06', value: '22.3', change: '+0.2%' },
+        { date: '2023-09-05', value: '22.1', change: '-0.1%' },
+        { date: '2023-09-04', value: '22.2', change: '+0.2%' },
+        { date: '2023-09-03', value: '22.0', change: '-0.3%' },
+        { date: '2023-09-02', value: '22.3', change: '+0.2%' },
+        { date: '2023-09-01', value: '22.1', change: '-0.5%' },
+      ]
     };
   },
   computed: {
@@ -86,38 +64,68 @@ export default {
       const first = parseFloat(this.detailedRecords[0].value);
       const last = parseFloat(this.detailedRecords[this.detailedRecords.length - 1].value);
       return (last - first).toFixed(2);
-    },
-    chartPoints() {
-      if (!this.detailedRecords.length) return [];
-      const n = this.detailedRecords.length;
-      const minGap = this.labelWidth + 8;
-      const maxGap = (this.screenWidth - this.basePadding * 2) / Math.max(n - 1, 1);
-      const gap = Math.max(minGap, Math.min(maxGap, 80));
-      this.svgWidth = gap;
-      const w = gap * (n - 1) || gap;
-      const h = this.svgHeight;
-      const yArr = this.detailedRecords.map(item => parseFloat(item.value));
-      const minY = Math.min(...yArr), maxY = Math.max(...yArr);
-      const rangeY = maxY - minY || 1;
-      const paddingTop = 24;
-      const paddingBottom = 28;
-      const chartHeight = h - paddingTop - paddingBottom;
-      this.$data.svgScrollWidth = Math.max(w + this.basePadding * 2, this.screenWidth);
-      return yArr.map((y, i) => [
-        gap * i + this.basePadding,
-        paddingTop + ((maxY - y) / rangeY) * chartHeight
-      ]);
-    },
-    chartPointsStr() {
-      return this.chartPoints.map(pt => pt.join(',')).join(' ');
     }
   },
-  created() {
-    this.detailedRecords = JSON.parse(decodeURIComponent(this.data));
+  async created() {
+    await this.fetchBodyFatRecords();
+    await this.$nextTick();
+    this.initChart();
+  },
+  methods: {
+    async fetchBodyFatRecords() {
+      try {
+        const token = uni.getStorageSync('jwtToken');
+        const res = await uni.request({
+          url: 'https://api.fanovian.cc:3000/api/fitness/get',
+          method: 'GET',
+          header: {
+            Authorization: token ? 'Bearer ' + token : ''
+          }
+        });
+        if (res.data && res.data.success) {
+          const records = (res.data.records || []).filter(r => r.type === 'body_fat')
+            .sort((a, b) => new Date(b.time) - new Date(a.time))
+            .map((r, i, arr) => {
+              let change = '';
+              if (i < arr.length - 1) {
+                const diff = (r.value - arr[i + 1].value).toFixed(1);
+                change = (diff > 0 ? '+' : '') + diff + '%';
+              } else {
+                change = '--';
+              }
+              return {
+                date: r.time.slice(0, 10),
+                value: r.value.toFixed(1),
+                change
+              };
+            });
+          this.detailedRecords = records.length ? records : this.sampleRecords;
+        } else {
+          this.detailedRecords = this.sampleRecords;
+        }
+      } catch (e) {
+        errorReport(e, 'fetchBodyFatRecords', '/pages/home/body_fat_detail');
+        this.detailedRecords = this.sampleRecords;
+      }
+    },
+    initChart() {
+      // 横轴仅显示日期，纵轴为体脂率
+      const categories = this.detailedRecords.map(item => {
+        if (item.date) {
+          return item.date.length === 10 ? item.date.slice(5) : item.date;
+        }
+        return '';
+      });
+      const data = this.detailedRecords.map(item => parseFloat(item.value) || 0);
+      this.chartData = {
+        categories,
+        series: [{ name: '体脂', data }]
+      };
+    }
   }
 };
 </script>
-  
+
 <style scoped>
 .detail-container {
   padding: 16rpx;
@@ -130,15 +138,6 @@ export default {
   justify-content: center;
   align-items: center;
   margin-bottom: 20rpx;
-}
-.simple-line-chart-scroll {
-  width: 100vw;
-  overflow-x: auto;
-}
-.simple-line-chart {
-  position: relative;
-  height: 220px;
-  min-width: 100vw;
 }
 .trend {
   margin-top: 10rpx;
@@ -159,23 +158,13 @@ export default {
 .negative {
   color: #F44336;
 }
-.chart-x-labels {
-  position: absolute;
-  left: 0;
-  top: 200px;
+.chart-x-axis {
+  display: flex;
+  justify-content: space-between;
   width: 100%;
-  height: 20px;
-  pointer-events: none;
+  margin-top: 10rpx;
 }
-.chart-x-label {
-  position: absolute;
-  top: 0;
-  text-align: center;
-  font-size: 18rpx;
-  color: #888;
-  transform: translateX(-50%);
-  min-width: 40px;
-  max-width: 60px;
-  white-space: nowrap;
+.x-label {
+  font-size: 24rpx;
 }
 </style>
