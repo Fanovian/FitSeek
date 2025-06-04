@@ -23,10 +23,11 @@
       <view v-else>
         <view class="form-group">
           <label>登录方式</label>
-          <select v-model="loginType">
-            <option value="0">手机号登录</option>
-            <option value="1">用户名登录</option>
-          </select>
+          <picker :range="loginTypeOptions" :value="loginTypeIndex" @change="onLoginTypeChange">
+            <view class="picker">
+              {{ loginTypeOptions[loginTypeIndex] }}
+            </view>
+          </picker>
         </view>
         <view class="form-group">
           <label>{{ loginType === '0' ? '手机号' : '用户名' }}</label>
@@ -56,7 +57,6 @@ import { ref } from 'vue';
 export default {
   setup() {
     // 登录相关
-    const loginType = ref('0');
     const value = ref('');
     const password = ref('');
     // 注册相关
@@ -67,6 +67,10 @@ export default {
     const errorMessage = ref('');
     const isRegister = ref(false);
 
+    const loginTypeOptions = ['手机号登录', '用户名登录'];
+    const loginTypeIndex = ref(0);
+    const loginType = ref('0');
+
     // 登录
     const handleLogin = async () => {
       errorMessage.value = '';
@@ -74,7 +78,8 @@ export default {
         errorMessage.value = '请输入手机号/用户名和密码';
         return;
       }
-      try {        const response = await uni.request({
+      try {        
+		  const response = await uni.request({
           url: 'https://api.fanovian.cc:3000/api/auth/login', // 使用HTTP
           method: 'POST',
           data: {
@@ -82,7 +87,8 @@ export default {
             value: value.value,
             password: password.value
           }
-        });if (response.data.success) {
+        });
+		if (response.data.success) {
           const token = response.data.token;
           uni.setStorageSync('jwtToken', token);
           console.log('JWT Token:', uni.getStorageSync('jwtToken'))
@@ -136,8 +142,16 @@ export default {
       }
     };
 
+    const onLoginTypeChange = (e) => {
+      loginTypeIndex.value = e.detail.value;
+      loginType.value = String(e.detail.value);
+    };
+
     return {
       loginType,
+      loginTypeOptions,
+      loginTypeIndex,
+      onLoginTypeChange,
       value,
       password,
       errorMessage,
@@ -261,5 +275,16 @@ input:focus, select:focus {
   margin-bottom: 8rpx;
   min-height: 32rpx;
   display: block;
+}
+.picker {
+  border: 1px solid #c8e6c9;
+  border-radius: 12rpx;
+  padding: 18rpx 20rpx;
+  font-size: 28rpx;
+  background: #f1f8e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60rpx;
 }
 </style>

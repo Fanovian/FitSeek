@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import errorReport from '@/utils/errorReport.js'
+
 const userInfo = ref({
   tel: '',
   name: '',
@@ -10,6 +10,7 @@ const userInfo = ref({
   weight_goal: '',
   password: '123456'
 })
+
 const showEditName = ref(false)
 const showEditPassword = ref(false)
 const showEditProfile = ref(false)
@@ -25,7 +26,7 @@ const serverStatus = ref('checking') // 'online', 'offline', 'checking'
 async function checkServerStatus() {
   try {
     const response = await uni.request({
-      url: 'https://api.fanovian.cc:3000/api/auth/login', 
+      url: 'https://api.fanovian.cc:3000/api/auth/login',
       method: 'POST',
       data: { type: 0, value: 'test', password: 'test' },
       timeout: 5000
@@ -33,7 +34,6 @@ async function checkServerStatus() {
     serverStatus.value = 'online'
     return true
   } catch (error) {
-    errorReport(error, 'checkServerStatus', '/pages/user/index')
     console.error('服务器连接失败:', error)
     serverStatus.value = 'offline'
     return false
@@ -43,34 +43,44 @@ async function checkServerStatus() {
 // 获取用户基本信息
 async function fetchBasicInfo() {
   const token = uni.getStorageSync('jwtToken')
+  console.log('当前token:', token) // 调试日志
+  
   if (!token) {
     uni.showToast({ title: '未登录，请先登录', icon: 'none' })
     uni.reLaunch({ url: '/pages/login/index' })
     return
   }
+  
   try {
     loading.value = true
+    console.log('发送请求到:', 'https://api.fanovian.cc:3000/api/profile/getBasicInfo') // 调试日志
+    
     const response = await uni.request({
-      url: 'https://api.fanovian.cc:3000/api/profile/getBasicInfo',  
+      url: 'https://api.fanovian.cc:3000/api/profile/getBasicInfo', 
       method: 'GET',
       header: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       }
     })
+
+    console.log('基本信息API响应:', response) // 调试日志
+
     if (response.data && response.data.success) {
       const user = response.data.user
+      // 更新基本信息
       userInfo.value.tel = user.tel || ''
       userInfo.value.name = user.name || '用户'
     } else {
+      console.error('获取基本信息API返回失败:', response.data) // 调试日志
       uni.showToast({ title: response.data?.message || '获取用户基本信息失败', icon: 'none' })
       if (response.data?.message?.includes('Token') || response.statusCode === 401) {
         uni.reLaunch({ url: '/pages/login/index' })
       }
     }
   } catch (error) {
-    errorReport(error, 'fetchBasicInfo', '/pages/user/index')
     console.error('获取用户基本信息失败:', error)
+    // 如果是网络错误，尝试从本地存储获取数据
     const loginInfo = uni.getStorageSync('userInfo') || {}
     if (loginInfo.tel || loginInfo.name) {
       userInfo.value.tel = loginInfo.tel || ''
@@ -85,22 +95,30 @@ async function fetchBasicInfo() {
 // 获取用户详细资料
 async function fetchUserProfile() {
   const token = uni.getStorageSync('jwtToken')
+  
   if (!token) {
     return
   }
+  
   try {
+    console.log('发送请求到:', 'https://api.fanovian.cc:3000/api/profile/get') // 调试日志
+    
     const response = await uni.request({
-      url: 'https://api.fanovian.cc:3000/api/profile/get',  
+      url: 'https://api.fanovian.cc:3000/api/profile/get', 
       method: 'GET',
       header: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       }
     })
+
+    console.log('详细资料API响应:', response) // 调试日志
+
     if (response.data && response.data.success) {
       const profile = response.data.profile
+      console.log('获取到的详细资料:', profile) // 调试日志
       userInfo.value = {
-        ...userInfo.value, 
+        ...userInfo.value, // 保留基本信息
         age: profile.age.toString(),
         gender: profile.gender === 'male' ? '男' : profile.gender === 'female' ? '女' : '其他',
         height: profile.height ? profile.height.toString() : '',
@@ -108,16 +126,16 @@ async function fetchUserProfile() {
         password: '********'
       }
     } else {
-      errorReport(new Error('API返回失败'), 'fetchUserProfile', '/pages/user/index')
-      console.error('获取详细资料API返回失败:', response.data)
-    }
-  } catch (error) {
-    errorReport(error, 'fetchUserProfile', '/pages/user/index')
+      console.error('获取详细资料API返回失败:', response.data) // 调试日志
+      // 如果详细资料获取失败，不影响基本信息的显示，只是不显示详细资料
+    }  } catch (error) {
     console.error('获取用户详细资料失败:', error)
+    // 如果是网络错误，尝试从本地存储获取数据
     const localProfile = uni.getStorageSync('localProfile') || {}
+    
     if (Object.keys(localProfile).length > 0) {
       userInfo.value = {
-        ...userInfo.value,
+        ...userInfo.value, // 保留基本信息
         age: localProfile.age || '',
         gender: localProfile.gender || '',
         height: localProfile.height || '',
@@ -139,34 +157,54 @@ async function updateUserProfile(field, value) {
     uni.reLaunch({ url: '/pages/login/index' })
     return false
   }
-  const updateData = { ...userInfo.value }
+
+  // 准备更新数据
+  const updateData = {
+    age: userInfo.value.age || null,
+    gender: userInfo.value.gender === '男' ? 'male' : userInfo.value.gender === '女' ? 'female' : 'other',
+    height: parseInt(userInfo.value.height) || null,
+    weight_goal: parseFloat(userInfo.value.weight_goal) || null
+  }
+
+  // 根据修改的字段更新对应值
   if (field === 'age') updateData.age = parseInt(value) || null
   if (field === 'gender') updateData.gender = value === '男' ? 'male' : value === '女' ? 'female' : 'other'
   if (field === 'height') updateData.height = parseInt(value) || null  
   if (field === 'weightGoal') updateData.weight_goal = parseFloat(value) || null
+
   try {
     loading.value = true
     const response = await uni.request({
-      url: 'https://api.fanovian.cc:3000/api/profile/update',
+      url: 'https://api.fanovian.cc:3000/api/profile/update', 
       method: 'POST',
-      data: updateData,
       header: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
-      }
+      },
+      data: updateData
     })    
     if (response.data && response.data.success) {
+      uni.showToast({ title: '修改成功', icon: 'success' })
       return true
     } else {
-      errorReport(new Error('API返回失败'), 'updateUserProfile', '/pages/user/index')
-      uni.showToast({ title: response.data?.message || '更新失败', icon: 'none' })
+      uni.showToast({ title: response.data?.message || '修改失败', icon: 'none' })
+      console.log('发送内容:', updateData) // 调试日志
+      console.log('更新用户资料API返回失败:', response) // 调试日志
       return false
     }
   } catch (error) {
-    errorReport(error, 'updateUserProfile', '/pages/user/index')
     console.error('更新用户资料失败:', error)
+    
+    // 如果服务器不可用，保存到本地存储
     const localProfile = uni.getStorageSync('localProfile') || {}
-    return true
+    if (field === 'age') localProfile.age = value
+    if (field === 'gender') localProfile.gender = value
+    if (field === 'height') localProfile.height = value
+    if (field === 'weightGoal') localProfile.weight_goal = value
+    
+    uni.setStorageSync('localProfile', localProfile)
+    uni.showToast({ title: '服务器连接失败，已保存到本地', icon: 'none' })
+    return true // 允许UI更新
   } finally {
     loading.value = false
   }
@@ -186,6 +224,7 @@ async function saveEdit(field) {
     uni.showToast({ title: '请输入有效值', icon: 'none' })
     return
   }
+
   const success = await updateUserProfile(field, tempValue.value)
   if (success) {
     if (field === 'weightGoal') {
@@ -207,16 +246,18 @@ async function saveEditName() {
     uni.showToast({ title: '请输入有效的用户名', icon: 'none' })
     return
   }
+
   const token = uni.getStorageSync('jwtToken')
   if (!token) {
     uni.showToast({ title: '未登录，请先登录', icon: 'none' })
     uni.reLaunch({ url: '/pages/login/index' })
     return
   }
+
   try {
     loading.value = true
     const response = await uni.request({
-      url: 'https://api.fanovian.cc:3000/api/profile/updateUsername', 
+      url: 'https://api.fanovian.cc:3000/api/profile/updateUsername',
       method: 'POST',
       header: {
         'Content-Type': 'application/json',
@@ -226,10 +267,13 @@ async function saveEditName() {
         newName: tempname.value.trim()
       }
     })
+
     if (response.data && response.data.success) {
       userInfo.value.name = tempname.value.trim()
       showEditName.value = false
       uni.showToast({ title: '用户名修改成功', icon: 'success' })
+      
+      // 同时更新本地存储的用户信息
       const loginInfo = uni.getStorageSync('userInfo') || {}
       loginInfo.name = tempname.value.trim()
       uni.setStorageSync('userInfo', loginInfo)
@@ -256,24 +300,28 @@ async function saveEditPassword() {
     uni.showToast({ title: '请填写完整的密码信息', icon: 'none' })
     return
   }
+
   if (newPassword.value !== confirmPassword.value) {
     uni.showToast({ title: '两次输入的新密码不一致', icon: 'none' })
     return
   }
+
   if (newPassword.value.length < 6) {
     uni.showToast({ title: '新密码至少需要6位字符', icon: 'none' })
     return
   }
+
   const token = uni.getStorageSync('jwtToken')
   if (!token) {
     uni.showToast({ title: '未登录，请先登录', icon: 'none' })
     uni.reLaunch({ url: '/pages/login/index' })
     return
   }
+
   try {
     loading.value = true
     const response = await uni.request({
-      url: 'https://api.fanovian.cc:3000/api/profile/updatePassword', 
+      url: 'https://api.fanovian.cc:3000/api/profile/updatePassword',
       method: 'POST',
       header: {
         'Content-Type': 'application/json',
@@ -284,9 +332,12 @@ async function saveEditPassword() {
         newPassword: newPassword.value
       }
     })
+
     if (response.data && response.data.success) {
       showEditPassword.value = false
       uni.showToast({ title: '密码修改成功，请重新登录', icon: 'success' })
+      
+      // 密码修改成功后清除token，要求重新登录
       setTimeout(() => {
         uni.removeStorageSync('jwtToken')
         uni.removeStorageSync('userInfo')
@@ -294,8 +345,7 @@ async function saveEditPassword() {
       }, 1500)
     } else {
       uni.showToast({ title: response.data?.message || '密码修改失败', icon: 'none' })
-    }
-  } catch (error) {
+    }  } catch (error) {
     console.error('修改密码失败:', error)
     uni.showToast({ title: '网络错误，请稍后重试', icon: 'none' })
   } finally {
@@ -309,14 +359,11 @@ function logout() {
   uni.reLaunch({ url: '/pages/login/index' })
 }
 
+// 页面加载时检查服务器状态并获取用户资料
 onMounted(async () => {
-  try {
-    await checkServerStatus()
-    await fetchBasicInfo()
-    await fetchUserProfile()
-  } catch (error) {
-    errorReport(error, 'onMounted', '/pages/user/index')
-  }
+  await checkServerStatus()
+  await fetchBasicInfo()
+  await fetchUserProfile()
 })
 </script>
 
@@ -326,18 +373,17 @@ onMounted(async () => {
     <view v-if="loading" class="loading-container">
       <text class="loading-text">加载中...</text>
     </view>
-
-    <view v-else>
+      <view v-else>
       <!-- 服务器状态指示器 -->
       <view class="server-status" :class="serverStatus">
         <text v-if="serverStatus === 'online'" class="status-text">🟢 服务器在线</text>
         <text v-else-if="serverStatus === 'offline'" class="status-text">🔴 服务器离线，使用本地数据</text>
         <text v-else class="status-text">🟡 检查服务器状态...</text>
       </view>
-
+      
       <view class="user-info">
-        <text class="username">{{ userInfo.name }}</text>
-        <button class="edit-btn edit-btn-inline" @click="openEdit('name')">修改</button>
+        <text class="username">{{ userInfo.name || '用户' }}</text>
+        <button class="edit-btn" @click="openEditName">修改</button>
       </view>
 
       <view class="profile-list">
@@ -384,8 +430,7 @@ onMounted(async () => {
           <view class="item-right">
             <text class="value">{{ userInfo.weight_goal || '未设置' }}</text>
           </view>
-        </view>
-        <view class="profile-item">
+        </view>        <view class="profile-item">
           <view class="item-left">
             <text class="label">密码</text>
             <button class="edit-btn" @click="openEditPassword">修改</button>
@@ -442,8 +487,7 @@ onMounted(async () => {
           <view class="popup-buttons">
             <button class="cancel-btn" @click="showEditProfile = false">取消</button>
             <button class="save-btn" @click="saveEdit('weightGoal')">保存</button>
-          </view>
-        </view>
+          </view>        </view>
       </uni-popup>
 
       <!-- 修改密码弹窗 -->
@@ -460,9 +504,165 @@ onMounted(async () => {
         </view>
       </uni-popup>
     </view>
-
-    <button class="logout-btn" @click="logout" style="margin-top: 10rpx; margin-bottom: 40rpx;">退出登录</button>
-
+    
     <view style="flex:1"></view>
+    <button class="logout-btn" @click="logout">退出登录</button>
   </view>
 </template>
+
+<style scoped>
+.container {
+  padding: 40rpx;
+  background: #f5fff7;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.server-status {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 16rpx 24rpx;
+  margin-bottom: 20rpx;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.status-text {
+  font-size: 24rpx;
+  color: #666;
+}
+.user-info {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+.username {
+  display: block;
+  font-size: 36rpx;
+  color: #388e3c;
+  font-weight: bold;
+  margin-bottom: 10rpx;
+}
+.profile-list {
+  background: #fff;
+  border-radius: 18rpx;
+  box-shadow: 0 2px 12px rgba(76,175,80,0.06);
+  padding: 30rpx;
+  margin-bottom: 40rpx;
+}
+.profile-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18rpx 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.profile-item:last-child {
+  border-bottom: none;
+}
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  min-width: 180rpx;
+}
+.label {
+  color: #388e3c;
+  font-size: 28rpx;
+}
+.edit-btn {
+  color: #43a047;
+  background: none;
+  border: none;
+  font-size: 24rpx;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0 8rpx;
+}
+.item-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.value {
+  color: #333;
+  font-size: 28rpx;
+  margin-left: 10rpx;
+}
+.logout-btn {
+  width: 100%;
+  background: linear-gradient(90deg, #43a047 0%, #66bb6a 100%);
+  color: #fff;
+  font-size: 32rpx;
+  border: none;
+  border-radius: 16rpx;
+  padding: 22rpx 0;
+  font-weight: bold;
+  letter-spacing: 2rpx;
+  box-shadow: 0 2px 8px rgba(76,175,80,0.10);
+  margin-top: 40rpx;
+  margin-bottom: 10rpx;
+}
+.popup-content {
+  padding: 40rpx 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  align-items: center;
+}
+.save-btn {
+  flex: 1;
+  background: #43a047;
+  color: #fff;
+  border-radius: 8rpx;
+  padding: 18rpx 0;
+  font-size: 28rpx;
+  font-weight: bold;
+  border: none;
+}
+.cancel-btn {
+  flex: 1;
+  background: #f5f5f5;
+  color: #666;
+  border-radius: 8rpx;
+  padding: 18rpx 0;
+  font-size: 28rpx;
+  border: none;
+}
+.picker-value {
+  padding: 18rpx 0;
+  color: #388e3c;
+  font-size: 28rpx;
+  text-align: center;
+}
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400rpx;
+}
+.loading-text {
+  color: #388e3c;
+  font-size: 28rpx;
+}
+.popup-title {
+  color: #388e3c;
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+.popup-input {
+  border: 1px solid #e0e0e0;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  width: 100%;
+  background: #f9f9f9;
+}
+.popup-buttons {
+  display: flex;
+  gap: 20rpx;
+  width: 100%;
+  margin-top: 20rpx;
+}
+</style>
