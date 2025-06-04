@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import errorReport from '@/utils/errorReport.js'
 const userInfo = ref({
   tel: '',
   name: '',
@@ -32,6 +33,7 @@ async function checkServerStatus() {
     serverStatus.value = 'online'
     return true
   } catch (error) {
+    errorReport(error, 'checkServerStatus', '/pages/user/index')
     console.error('服务器连接失败:', error)
     serverStatus.value = 'offline'
     return false
@@ -67,6 +69,7 @@ async function fetchBasicInfo() {
       }
     }
   } catch (error) {
+    errorReport(error, 'fetchBasicInfo', '/pages/user/index')
     console.error('获取用户基本信息失败:', error)
     const loginInfo = uni.getStorageSync('userInfo') || {}
     if (loginInfo.tel || loginInfo.name) {
@@ -105,9 +108,11 @@ async function fetchUserProfile() {
         password: '********'
       }
     } else {
+      errorReport(new Error('API返回失败'), 'fetchUserProfile', '/pages/user/index')
       console.error('获取详细资料API返回失败:', response.data)
     }
   } catch (error) {
+    errorReport(error, 'fetchUserProfile', '/pages/user/index')
     console.error('获取用户详细资料失败:', error)
     const localProfile = uni.getStorageSync('localProfile') || {}
     if (Object.keys(localProfile).length > 0) {
@@ -134,12 +139,7 @@ async function updateUserProfile(field, value) {
     uni.reLaunch({ url: '/pages/login/index' })
     return false
   }
-  const updateData = {
-    age: userInfo.value.age || null,
-    gender: userInfo.value.gender === '男' ? 'male' : userInfo.value.gender === '女' ? 'female' : 'other',
-    height: parseInt(userInfo.value.height) || null,
-    weight_goal: parseFloat(userInfo.value.weight_goal) || null
-  }
+  const updateData = { ...userInfo.value }
   if (field === 'age') updateData.age = parseInt(value) || null
   if (field === 'gender') updateData.gender = value === '男' ? 'male' : value === '女' ? 'female' : 'other'
   if (field === 'height') updateData.height = parseInt(value) || null  
@@ -147,32 +147,25 @@ async function updateUserProfile(field, value) {
   try {
     loading.value = true
     const response = await uni.request({
-      url: 'https://api.fanovian.cc:3000/api/profile/update',  
+      url: 'https://api.fanovian.cc:3000/api/profile/update',
       method: 'POST',
+      data: updateData,
       header: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
-      },
-      data: updateData
+      }
     })    
     if (response.data && response.data.success) {
-      uni.showToast({ title: '修改成功', icon: 'success' })
       return true
     } else {
-      uni.showToast({ title: response.data?.message || '修改失败', icon: 'none' })
-      console.log('发送内容:', updateData)
-      console.log('更新用户资料API返回失败:', response)
+      errorReport(new Error('API返回失败'), 'updateUserProfile', '/pages/user/index')
+      uni.showToast({ title: response.data?.message || '更新失败', icon: 'none' })
       return false
     }
   } catch (error) {
+    errorReport(error, 'updateUserProfile', '/pages/user/index')
     console.error('更新用户资料失败:', error)
     const localProfile = uni.getStorageSync('localProfile') || {}
-    if (field === 'age') localProfile.age = value
-    if (field === 'gender') localProfile.gender = value
-    if (field === 'height') localProfile.height = value
-    if (field === 'weightGoal') localProfile.weight_goal = value
-    uni.setStorageSync('localProfile', localProfile)
-    uni.showToast({ title: '服务器连接失败，已保存到本地', icon: 'none' })
     return true
   } finally {
     loading.value = false
@@ -317,9 +310,13 @@ function logout() {
 }
 
 onMounted(async () => {
-  await checkServerStatus()
-  await fetchBasicInfo()
-  await fetchUserProfile()
+  try {
+    await checkServerStatus()
+    await fetchBasicInfo()
+    await fetchUserProfile()
+  } catch (error) {
+    errorReport(error, 'onMounted', '/pages/user/index')
+  }
 })
 </script>
 

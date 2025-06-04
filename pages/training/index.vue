@@ -4,6 +4,7 @@ import { useTrainingStore } from './store/training.js';
 import WorkoutForm from './components/WorkoutForm.vue';
 import WorkoutRecords from './components/WorkoutRecords.vue';
 import TrainingStats from './components/TrainingStats.vue';
+import errorReport from '@/utils/errorReport.js';
 
 // 使用训练记录状态管理
 const trainingStore = useTrainingStore();
@@ -21,31 +22,43 @@ const showAddForm = ref(false);
 
 // 添加新的锻炼记录
 const addWorkoutRecord = (formData) => {
-  // 创建新记录并添加到store
-  storeAddWorkoutRecord(formData);
-  
-  // 关闭表单
-  showAddForm.value = false;
-  
-  uni.showToast({
-    title: '添加成功',
-    icon: 'success'
-  });
+  try {
+    // 创建新记录并添加到store
+    storeAddWorkoutRecord(formData);
+    
+    // 关闭表单
+    showAddForm.value = false;
+    
+    uni.showToast({
+      title: '添加成功',
+      icon: 'success'
+    });
+  } catch (error) {
+    errorReport(error, 'addWorkoutRecord', '/pages/training/index');
+  }
 };
 
 // 处理删除锻炼记录
 const handleDeleteRecord = (id) => {
-  if (deleteWorkoutRecord(id)) {
-    uni.showToast({
-      title: '删除成功',
-      icon: 'success'
-    });
+  try {
+    if (deleteWorkoutRecord(id)) {
+      uni.showToast({
+        title: '删除成功',
+        icon: 'success'
+      });
+    }
+  } catch (error) {
+    errorReport(error, 'handleDeleteRecord', '/pages/training/index');
   }
 };
 
 // 页面加载时获取数据
 onMounted(() => {
-  fetchWorkoutRecords();
+  try {
+    fetchWorkoutRecords();
+  } catch (error) {
+    errorReport(error, 'onMounted', '/pages/training/index');
+  }
 });
 </script>
 

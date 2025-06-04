@@ -5,7 +5,7 @@
     <view class="top-section">
       <view class="target-info">
         <text class="label">距离目标</text>
-        <text class="value">5.2kg</text>
+        <text class="value">{{ distanceToGoal }}kg</text>
       </view>
       
       <view class="current-weight">
@@ -45,7 +45,6 @@
         <TrainingCard 
           :records="trainingRecords.length ? trainingRecords : sampleTrainingRecords"
         />
-
       </view>
     </scroll-view>
   </view>
@@ -59,6 +58,30 @@ import BloodOxygenCard from '@/pages/home/components/BloodOxygenCard.vue';
 import HeartRateCard from '@/pages/home/components/HeartRateCard.vue';
 import AnnouncementCard from '@/pages/home/components/AnnouncementCard.vue';
 import ArticleCard from '@/pages/home/components/ArticleCard.vue';
+import errorReport from '@/utils/errorReport.js';
+
+// 简单异常自动上报方法，建议提取为 util 并在每个页面引用
+function errorReport(err, info = '') {
+  try {
+    const payload = {
+      message: err && err.message ? err.message : String(err),
+      stack: err && err.stack ? err.stack : '',
+      info,
+      page: '/pages/home/index',
+      time: new Date().toISOString(),
+      ua: typeof navigator !== 'undefined' ? navigator.userAgent : ''
+    };
+    // 推荐：上报到后端日志接口
+    uni.request({
+      url: 'https://api.fanovian.cc:3000/api/log/error',
+      method: 'POST',
+      data: payload,
+      header: { 'Content-Type': 'application/json' }
+    });
+  } catch (e) {
+    // 上报失败可忽略
+  }
+}
 
 export default {
   components: {
@@ -137,8 +160,9 @@ export default {
       ],
       currentWeight: '--',
       currentBMI: '--',
-      height: 170, // cm，后续可动态获取
-      targetWeight: 60, // 目标体重，后续可动态获取
+      height: null, // 动态获取
+      targetWeight: null, // 动态获取
+      distanceToGoal: '--', // 新增
       sampleAnnouncementList: [
         {
           _id: '1',
@@ -173,11 +197,12 @@ export default {
     // 获取体重记录
     async fetchWeightRecords() {
       try {
+        const token = uni.getStorageSync('jwtToken');
         const res = await uni.request({
           url: 'https://api.fanovian.cc:3000/api/fitness/get',
           method: 'GET',
           header: {
-            Authorization: 'Bearer ' + (uni.getStorageSync('jwtToken') || '')
+            Authorization: token ? 'Bearer ' + token : ''
           }
         });
         if (res.data && res.data.success) {
@@ -195,20 +220,24 @@ export default {
               }
               return { date: r.time.slice(0, 10), value, change };
             });
-          this.weightRecords = records;
+          this.weightRecords = records.length ? records : this.sampleWeightRecords;
+        } else {
+          this.weightRecords = this.sampleWeightRecords;
         }
       } catch (e) {
-        // 网络异常等可忽略，保留示例数据
+        errorReport(e, 'fetchWeightRecords', '/pages/home/index');
+        this.weightRecords = this.sampleWeightRecords;
       }
     },
     // 获取体脂记录
     async fetchBodyFatRecords() {
       try {
+        const token = uni.getStorageSync('jwtToken');
         const res = await uni.request({
           url: 'https://api.fanovian.cc:3000/api/fitness/get',
           method: 'GET',
           header: {
-            Authorization: 'Bearer ' + (uni.getStorageSync('jwtToken') || '')
+            Authorization: token ? 'Bearer ' + token : ''
           }
         });
         if (res.data && res.data.success) {
@@ -226,20 +255,24 @@ export default {
               }
               return { date: r.time.slice(0, 10), value, change };
             });
-          this.bodyFatRecords = records;
+          this.bodyFatRecords = records.length ? records : this.sampleBodyFatRecords;
+        } else {
+          this.bodyFatRecords = this.sampleBodyFatRecords;
         }
       } catch (e) {
-        // 网络异常等可忽略，保留示例数据
+        errorReport(e, 'fetchBodyFatRecords', '/pages/home/index');
+        this.bodyFatRecords = this.sampleBodyFatRecords;
       }
     },
     // 获取锻炼记录
     async fetchTrainingRecords() {
       try {
+        const token = uni.getStorageSync('jwtToken');
         const res = await uni.request({
           url: 'https://api.fanovian.cc:3000/api/training/get',
           method: 'GET',
           header: {
-            Authorization: 'Bearer ' + (uni.getStorageSync('jwtToken') || '')
+            Authorization: token ? 'Bearer ' + token : ''
           }
         });
         if (res.data && res.data.success) {
@@ -262,20 +295,24 @@ export default {
                 content: r.content || ''
               };
             });
-          this.trainingRecords = records;
+          this.trainingRecords = records.length ? records : this.sampleTrainingRecords;
+        } else {
+          this.trainingRecords = this.sampleTrainingRecords;
         }
       } catch (e) {
-        // 网络异常等可忽略，保留示例数据
+        errorReport(e, 'fetchTrainingRecords', '/pages/home/index');
+        this.trainingRecords = this.sampleTrainingRecords;
       }
     },
     // 获取血氧记录
     async fetchBloodOxygenRecords() {
       try {
+        const token = uni.getStorageSync('jwtToken');
         const res = await uni.request({
           url: 'https://api.fanovian.cc:3000/api/fitness/get',
           method: 'GET',
           header: {
-            Authorization: 'Bearer ' + (uni.getStorageSync('jwtToken') || '')
+            Authorization: token ? 'Bearer ' + token : ''
           }
         });
         if (res.data && res.data.success) {
@@ -296,20 +333,24 @@ export default {
                 change
               };
             });
-          this.bloodOxygenRecords = records;
+          this.bloodOxygenRecords = records.length ? records : this.sampleBloodOxygenRecords;
+        } else {
+          this.bloodOxygenRecords = this.sampleBloodOxygenRecords;
         }
       } catch (e) {
-        // 网络异常等可忽略，保留示例数据
+        errorReport(e, 'fetchBloodOxygenRecords', '/pages/home/index');
+        this.bloodOxygenRecords = this.sampleBloodOxygenRecords;
       }
     },
     // 获取心率记录
     async fetchHeartRateRecords() {
       try {
+        const token = uni.getStorageSync('jwtToken');
         const res = await uni.request({
           url: 'https://api.fanovian.cc:3000/api/fitness/get',
           method: 'GET',
           header: {
-            Authorization: 'Bearer ' + (uni.getStorageSync('jwtToken') || '')
+            Authorization: token ? 'Bearer ' + token : ''
           }
         });
         if (res.data && res.data.success) {
@@ -330,10 +371,13 @@ export default {
                 change
               };
             });
-          this.heartRateRecords = records;
+          this.heartRateRecords = records.length ? records : this.sampleHeartRateRecords;
+        } else {
+          this.heartRateRecords = this.sampleHeartRateRecords;
         }
       } catch (e) {
-        // 网络异常等可忽略，保留示例数据
+        errorReport(e, 'fetchHeartRateRecords', '/pages/home/index');
+        this.heartRateRecords = this.sampleHeartRateRecords;
       }
     },
     // 获取公告
@@ -344,9 +388,10 @@ export default {
           method: 'GET',
           header: { 'Content-Type': 'application/json' }
         });
-        this.announcementList = res.data.announcements || [];
+        this.announcementList = (res.data.announcements && res.data.announcements.length) ? res.data.announcements : this.sampleAnnouncementList;
       } catch (e) {
-        this.announcementList = [];
+        errorReport(e, 'fetchAnnouncements', '/pages/home/index');
+        this.announcementList = this.sampleAnnouncementList;
       }
     },
     // 获取文章
@@ -357,19 +402,41 @@ export default {
           method: 'GET',
           header: { 'Content-Type': 'application/json' }
         });
-        this.articleList = res.data.articles || [];
+        this.articleList = (res.data.articles && res.data.articles.length) ? res.data.articles : this.sampleArticleList;
       } catch (e) {
-        this.articleList = [];
+        errorReport(e, 'fetchArticles', '/pages/home/index');
+        this.articleList = this.sampleArticleList;
       }
     },
-    // 获取最新体重和BMI
+    // 获取用户资料（身高和目标体重）
+    async fetchProfile() {
+      try {
+        const token = uni.getStorageSync('jwtToken');
+        const res = await uni.request({
+          url: 'https://api.fanovian.cc:3000/api/profile/get',
+          method: 'GET',
+          header: {
+            Authorization: token ? 'Bearer ' + token : ''
+          }
+        });
+        if (res.data && res.data.success && res.data.profile) {
+          this.height = res.data.profile.height;
+          this.targetWeight = res.data.profile.weight_goal;
+        }
+      } catch (e) {
+        errorReport(e, 'fetchProfile', '/pages/home/index');
+        // 网络异常等可忽略，保留默认
+      }
+    },
+    // 获取最新体重、BMI、距离目标
     async fetchCurrentWeightAndBMI() {
       try {
+        const token = uni.getStorageSync('jwtToken');
         const res = await uni.request({
           url: 'https://api.fanovian.cc:3000/api/fitness/get',
           method: 'GET',
           header: {
-            Authorization: 'Bearer ' + (uni.getStorageSync('jwtToken') || '')
+            Authorization: token ? 'Bearer ' + token : ''
           }
         });
         if (res.data && res.data.success) {
@@ -378,30 +445,52 @@ export default {
             .sort((a, b) => new Date(b.time) - new Date(a.time))[0];
           if (weightRecord) {
             this.currentWeight = weightRecord.value;
-            // BMI = 体重(kg) / (身高(m)^2)
-            this.currentBMI = (weightRecord.value / Math.pow(this.height / 100, 2)).toFixed(1);
+            if (this.height) {
+              this.currentBMI = (weightRecord.value / Math.pow(this.height / 100, 2)).toFixed(1);
+            } else {
+              this.currentBMI = '--';
+            }
+            if (this.targetWeight !== null) {
+              this.distanceToGoal = (weightRecord.value - this.targetWeight).toFixed(1) + 'kg';
+            } else {
+              this.distanceToGoal = '--';
+            }
           }
         }
       } catch (e) {
+        errorReport(e, 'fetchCurrentWeightAndBMI', '/pages/home/index');
         // 网络异常等可忽略
       }
     },
     goToAnnouncementList() {
-      uni.navigateTo({ url: '/pages/home/announcement_list' });
+      try {
+        uni.navigateTo({ url: '/pages/home/announcement_list' });
+      } catch (e) {
+        errorReport(e, 'goToAnnouncementList', '/pages/home/index');
+      }
     },
     goToArticleList() {
-      uni.navigateTo({ url: '/pages/home/article_list' });
+      try {
+        uni.navigateTo({ url: '/pages/home/article_list' });
+      } catch (e) {
+        errorReport(e, 'goToArticleList', '/pages/home/index');
+      }
     },
   },
-  created() {
-    this.fetchWeightRecords();
-    this.fetchBodyFatRecords();
-    this.fetchTrainingRecords();
-    this.fetchBloodOxygenRecords();
-    this.fetchHeartRateRecords();
-    this.fetchAnnouncements();
-    this.fetchArticles();
-    this.fetchCurrentWeightAndBMI();
+  async created() {
+    try {
+      await this.fetchProfile();
+      await this.fetchCurrentWeightAndBMI();
+      this.fetchWeightRecords();
+      this.fetchBodyFatRecords();
+      this.fetchTrainingRecords();
+      this.fetchBloodOxygenRecords();
+      this.fetchHeartRateRecords();
+      this.fetchAnnouncements();
+      this.fetchArticles();
+    } catch (e) {
+      errorReport(e, 'created lifecycle', '/pages/home/index');
+    }
   }
 };
 </script>

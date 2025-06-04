@@ -85,6 +85,7 @@ export default {
         });if (response.data.success) {
           const token = response.data.token;
           uni.setStorageSync('jwtToken', token);
+          console.log('JWT Token:', uni.getStorageSync('jwtToken'))
           
           // 保存用户信息用于资料页面
           const userInfo = {
