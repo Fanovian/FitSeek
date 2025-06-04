@@ -21,10 +21,10 @@ const {
 const showAddForm = ref(false);
 
 // 添加新的锻炼记录
-const addWorkoutRecord = (formData) => {
+const addWorkoutRecord = async (formData) => {
   try {
-    // 创建新记录并添加到store
-    storeAddWorkoutRecord(formData);
+    // 调用store中的API方法
+    await storeAddWorkoutRecord(formData);
     
     // 关闭表单
     showAddForm.value = false;
@@ -34,20 +34,29 @@ const addWorkoutRecord = (formData) => {
       icon: 'success'
     });
   } catch (error) {
+    console.error('添加锻炼记录失败:', error);
+    uni.showToast({
+      title: '添加失败，请重试',
+      icon: 'none'
+    });
     errorReport(error, 'addWorkoutRecord', '/pages/training/index');
   }
 };
 
 // 处理删除锻炼记录
-const handleDeleteRecord = (id) => {
+const handleDeleteRecord = async (id) => {
   try {
-    if (deleteWorkoutRecord(id)) {
-      uni.showToast({
-        title: '删除成功',
-        icon: 'success'
-      });
-    }
+    await deleteWorkoutRecord(id);
+    uni.showToast({
+      title: '删除成功',
+      icon: 'success'
+    });
   } catch (error) {
+    console.error('删除锻炼记录失败:', error);
+    uni.showToast({
+      title: '删除失败，请重试',
+      icon: 'none'
+    });
     errorReport(error, 'handleDeleteRecord', '/pages/training/index');
   }
 };
