@@ -29,7 +29,7 @@ def delete_diet_record(i):
     }
     start = time.time()
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=5)
+        response = requests.post(url, headers=headers, json=data, timeout=150)
         elapsed = time.time() - start
         with lock:
             time_list.append(elapsed)

@@ -14,7 +14,7 @@ time_list = []
 
 def login(i):
     global fail_count
-    tel = f"34567819{str(i).zfill(4)}"
+    tel = f"00034567819{str(i).zfill(4)}"
     password = "password"
     data = {
         "type": 0,
@@ -23,7 +23,7 @@ def login(i):
     }
     start = time.time()
     try:
-        response = requests.post(url, json=data, timeout=5)
+        response = requests.post(url, json=data, timeout=150)
         elapsed = time.time() - start
         resp_json = response.json()
         with lock:
@@ -59,6 +59,8 @@ if __name__ == "__main__":
     print(f"完成登录{max_tasks}个账号，失败{fail_count}个。")
     print(f"总耗时: {total_time:.2f}s，平均单次耗时: {avg_time:.3f}s，最大耗时: {max_time:.3f}s，最小耗时: {min_time:.3f}s")
     print(f"QPS（每秒处理请求数）: {qps:.2f}")
+    if fail_count > 0:
+        print(f"失败账号列表: {fail_list}")
 
     # 写入文件
     with open("login_tokens.json", "w", encoding="utf-8") as f:

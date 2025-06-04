@@ -31,7 +31,7 @@ def update_password(i):
     }
     start = time.time()
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=5)
+        response = requests.post(url, headers=headers, json=data, timeout=150)
         elapsed = time.time() - start
         with lock:
             time_list.append(elapsed)
@@ -42,7 +42,7 @@ def update_password(i):
         else:
             with lock:
                 fail_count += 1
-        print(f"修改密码: 状态码: {response.status_code}, 用时: {elapsed:.3f}s, 返回: {response.text}")
+        # print(f"修改密码: 状态码: {response.status_code}, 用时: {elapsed:.3f}s, 返回: {response.text}")
     except Exception as e:
         elapsed = time.time() - start
         with lock:

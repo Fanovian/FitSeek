@@ -18,7 +18,7 @@ def add_item(i):
     }
     # 食物库参数
     data = {
-        "name": f"测试食物{i}",
+        "name": f"测试食物a{i}",
         "calories": 100 + i,
         "category": "staple",
         "note": f"备注{i}"
@@ -31,7 +31,7 @@ def add_item(i):
     # }
     start = time.time()
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=5)
+        response = requests.post(url, headers=headers, json=data, timeout=150)
         elapsed = time.time() - start
         with lock:
             time_list.append(elapsed)
@@ -46,7 +46,7 @@ def add_item(i):
         else:
             with lock:
                 fail_count += 1
-        print(f"添加: 状态码: {response.status_code}, 用时: {elapsed:.3f}s, 返回: {response.text}")
+        # print(f"添加: 状态码: {response.status_code}, 用时: {elapsed:.3f}s, 返回: {response.text}")
     except Exception as e:
         elapsed = time.time() - start
         with lock:

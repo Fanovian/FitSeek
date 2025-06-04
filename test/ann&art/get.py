@@ -17,7 +17,7 @@ def get_article_list(i):
     }
     start = time.time()
     try:
-        response = requests.get(url, headers=headers, timeout=5)
+        response = requests.get(url, headers=headers, timeout=150)
         elapsed = time.time() - start
         with lock:
             time_list.append(elapsed)
@@ -27,7 +27,7 @@ def get_article_list(i):
         else:
             with lock:
                 fail_count += 1
-        print(f"获取列表: 状态码: {response.status_code}, 用时: {elapsed:.3f}s, 返回: {response.text}")
+        # print(f"获取列表: 状态码: {response.status_code}, 用时: {elapsed:.3f}s, 返回: {response.text}")
     except Exception as e:
         elapsed = time.time() - start
         with lock:

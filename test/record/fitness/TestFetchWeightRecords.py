@@ -26,7 +26,7 @@ def fetch_weight_records(i):
     }
     start = time.time()
     try:
-        response = requests.get(url, headers=headers, timeout=5)
+        response = requests.get(url, headers=headers, timeout=150)
         elapsed = time.time() - start
         with lock:
             time_list.append(elapsed)

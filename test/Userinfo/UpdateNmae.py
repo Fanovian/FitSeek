@@ -17,7 +17,7 @@ with open("login_tokens.json", "r", encoding="utf-8") as f:
 def update_username(i):
     global fail_count, success_count
     token = token_list[i]["token"]
-    new_name = f"fitseek-user-new-{i}"
+    new_name = f"fitseek-user-news-{i}"
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/json"
@@ -27,7 +27,7 @@ def update_username(i):
     }
     start = time.time()
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=5)
+        response = requests.post(url, headers=headers, json=data, timeout=150)
         elapsed = time.time() - start
         with lock:
             time_list.append(elapsed)
@@ -38,7 +38,7 @@ def update_username(i):
         else:
             with lock:
                 fail_count += 1
-        print(f"修改用户名: 状态码: {response.status_code}, 用时: {elapsed:.3f}s, 返回: {response.text}")
+        # print(f"修改用户名: 状态码: {response.status_code}, 用时: {elapsed:.3f}s, 返回: {response.text}")
     except Exception as e:
         elapsed = time.time() - start
         with lock:

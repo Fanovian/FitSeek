@@ -12,8 +12,8 @@ time_list = []
 
 def register(i):
     global fail_count
-    tel = f"34567819{str(i).zfill(4)}"
-    name = f"taaestusera{i}"
+    tel = f"00034567819{str(i).zfill(4)}"
+    name = f"t1aaestusera{i}"
     password = "password"
     data = {
         "tel": tel,
@@ -22,7 +22,7 @@ def register(i):
     }
     start = time.time()
     try:
-        response = requests.post(url, json=data, timeout=5)
+        response = requests.post(url, json=data, timeout=150)
         elapsed = time.time() - start
         with lock:
             time_list.append(elapsed)

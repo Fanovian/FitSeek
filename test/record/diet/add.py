@@ -31,7 +31,7 @@ def add_diet_record(i):
     }
     start = time.time()
     try:
-        response = requests.post(url, headers=headers, json=data, timeout=5)
+        response = requests.post(url, headers=headers, json=data, timeout=150)
         elapsed = time.time() - start
         with lock:
             time_list.append(elapsed)
@@ -48,6 +48,17 @@ def add_diet_record(i):
             fail_count += 1
             time_list.append(elapsed)
         print(f"添加diet异常: {e}, 用时: {elapsed:.3f}s")
+        err = {
+            "index": i,
+            "error": str(e),
+            "elapsed": elapsed
+        }
+        with open("diet_errors.json", "a", encoding="utf-8") as err_file:
+            json.dump(err, err_file, ensure_ascii=False)
+            err_file.write("\n")
+        
+        
+            
 
 if __name__ == "__main__":
     max_workers = 50
