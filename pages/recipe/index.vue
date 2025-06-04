@@ -24,10 +24,10 @@ const {
 const showAddForm = ref(false);
 
 // 添加新的饮食记录
-const addMeal = (formData) => {
+const addMeal = async (formData) => {
   try {
     // 创建新记录并添加到store
-    addMealRecord(formData);
+    await addMealRecord(formData);
     
     // 关闭表单
     showAddForm.value = false;
@@ -37,20 +37,34 @@ const addMeal = (formData) => {
       icon: 'success'
     });
   } catch (error) {
+    uni.showToast({
+      title: '添加失败',
+      icon: 'error'
+    });
     errorReport(error, 'addMeal', '/pages/recipe/index');
   }
 };
 
 // 处理删除饮食记录
-const handleDeleteRecord = ({ date, id }) => {
+const handleDeleteRecord = async ({ date, id }) => {
   try {
-    if (deleteMealRecord(date, id)) {
+    const success = await deleteMealRecord(date, id);
+    if (success) {
       uni.showToast({
         title: '删除成功',
         icon: 'success'
       });
+    } else {
+      uni.showToast({
+        title: '删除失败',
+        icon: 'error'
+      });
     }
   } catch (error) {
+    uni.showToast({
+      title: '删除失败',
+      icon: 'error'
+    });
     errorReport(error, 'handleDeleteRecord', '/pages/recipe/index');
   }
 };

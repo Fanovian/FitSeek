@@ -25,97 +25,217 @@ export const useRecipeStore = () => {
     const day = String(today.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
-
   // 格式化时间戳
   const formatTimestamp = () => {
     const currentDate = getTodayDateString();
     return `${currentDate} ${new Date().toTimeString().slice(0, 5)}`;
   };
 
+  // 中文餐食类型到英文的映射
+  const mealTypeMap = {
+    '早餐': 'breakfast',
+    '午餐': 'lunch', 
+    '晚餐': 'dinner',
+    '加餐': 'snack'
+  };
+
+  // 英文餐食类型到中文的映射
+  const englishToChineseMap = {
+    'breakfast': '早餐',
+    'lunch': '午餐',
+    'dinner': '晚餐', 
+    'snack': '加餐'
+  };
+
   // 从后端获取饮食记录
   const fetchMealHistory = () => {
-    // 模拟 API 调用获取历史饮食数据
-    // 实际项目中这里应该是API调用
-    // 这里使用Promise模拟异步请求
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const data = [
-          {
-            date: '2025-05-16', // 当天
-            meals: [
-              { id: 1, type: '早餐', name: '燕麦粥', calories: 200, timestamp: '2025-05-16 08:30' },
-              { id: 2, type: '早餐', name: '煮鸡蛋', calories: 80, timestamp: '2025-05-16 08:30' },
-              { id: 3, type: '午餐', name: '水煮鸡胸肉', calories: 250, timestamp: '2025-05-16 12:30' },
-              { id: 4, type: '午餐', name: '蔬菜沙拉', calories: 120, timestamp: '2025-05-16 12:30' },
-              { id: 5, type: '午餐', name: '糙米饭', calories: 180, timestamp: '2025-05-16 12:30' },
-            ]
-          },
-          {
-            date: '2025-05-15',
-            meals: [
-              { id: 6, type: '早餐', name: '全麦面包', calories: 150, timestamp: '2025-05-15 08:15' },
-              { id: 7, type: '午餐', name: '烤鸡肉', calories: 300, timestamp: '2025-05-15 12:00' },
-              { id: 8, type: '晚餐', name: '烤三文鱼', calories: 220, timestamp: '2025-05-15 18:30' },
-              { id: 9, type: '晚餐', name: '蒸青菜', calories: 70, timestamp: '2025-05-15 18:30' },
-              { id: 10, type: '加餐', name: '酸奶', calories: 120, timestamp: '2025-05-15 15:00' },
-            ]
+    return new Promise((resolve, reject) => {
+      uni.request({
+        url: 'https://api.fanovian.cc:3000/api/diet/get',
+        method: 'GET',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + uni.getStorageSync('jwtToken')
+        },          
+        success: (res) => {
+          console.log('fetchMealHistory API 返回值:', res);
+          console.log('fetchMealHistory 数据:', res.data);
+            if (res.statusCode === 200 && res.data.success) {
+            const records = res.data.records; // API返回的是 {success: true, records: [...]}
+            
+            // 将API数据转换为本地数据结构
+            const groupedData = {};
+            
+            records.forEach(record => {
+              // 将时间戳转换为日期字符串
+              const date = new Date(record.created_at).toISOString().slice(0, 10);
+                // 构建本地记录格式
+              const localRecord = {
+                id: record.record_id,
+                type: englishToChineseMap[record.meal_type] || record.meal_type,
+                name: record.food_name,
+                calories: record.calories,
+                timestamp: new Date(record.created_at).toLocaleString('zh-CN', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                }).replace(/\//g, '-')
+              };
+              
+              // 按日期分组
+              if (!groupedData[date]) {
+                groupedData[date] = {
+                  date: date,
+                  meals: []
+                };
+              }
+              
+              groupedData[date].meals.push(localRecord);
+            });
+            
+            // 转换为数组并按日期排序（最新的在前）
+            const formattedData = Object.values(groupedData).sort((a, b) => {
+              return new Date(b.date) - new Date(a.date);
+            });
+            
+            // 每天的meals按时间排序
+            formattedData.forEach(day => {
+              day.meals.sort((a, b) => {
+                return new Date(a.timestamp) - new Date(b.timestamp);
+              });
+            });
+            
+            mealHistory.value = formattedData;
+            resolve(formattedData);
+          } else {
+            console.error('获取饮食记录失败:', res);
+            reject(new Error('获取饮食记录失败'));
           }
-        ];
-        mealHistory.value = data;
-        resolve(data);
-      }, 500);
+        },        fail: (error) => {
+          console.error('API调用失败:', error);
+          reject(error);
+        }
+      });
     });
   };
 
   // 添加新的饮食记录
   const addMealRecord = (mealData) => {
-    // 实际项目中应该先发送到后端，成功后再添加到本地状态
-    const currentDate = getTodayDateString();
-    
-    // 构建新记录
-    const newRecord = {
-      id: Date.now(), // 使用时间戳作为临时ID
-      type: mealData.type,
-      name: mealData.name,
-      calories: parseInt(mealData.calories),
-      timestamp: formatTimestamp()
-    };
-    
-    // 查找今天的记录
-    const todayIndex = mealHistory.value.findIndex(day => day.date === currentDate);
-    
-    if (todayIndex >= 0) {
-      // 今天已有记录，添加到今天的记录中
-      mealHistory.value[todayIndex].meals.push(newRecord);
-    } else {
-      // 今天没有记录，新建今天的记录
-      mealHistory.value.unshift({
-        date: currentDate,
-        meals: [newRecord]
-      });
-    }
-    
-    return newRecord;
-  };
-
-  // 删除饮食记录
-  const deleteMealRecord = (date, id) => {
-    // 实际项目中应该发送请求到后端删除
-    // 然后再删除本地数据
-    const dayIndex = mealHistory.value.findIndex(day => day.date === date);
-    if (dayIndex !== -1) {
-      const meals = mealHistory.value[dayIndex].meals;
-      const mealIndex = meals.findIndex(meal => meal.id === id);
-      if (mealIndex !== -1) {
-        meals.splice(mealIndex, 1);
-        // 如果该天没有记录了，可以考虑移除整天
-        if (meals.length === 0) {
-          mealHistory.value.splice(dayIndex, 1);
+    return new Promise((resolve, reject) => {
+      // 将中文餐食类型转换为英文
+      const englishMealType = mealTypeMap[mealData.type] || 'snack';
+      
+      uni.request({
+        url: 'https://api.fanovian.cc:3000/api/diet/add',
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + uni.getStorageSync('jwtToken')
+        },
+        data: {
+          meal_type: englishMealType,
+          calories: parseInt(mealData.calories),
+          food_name: mealData.name
+        },
+        success: (res) => {
+          if (res.statusCode === 200 && res.data.success) {
+            const apiRecord = res.data.record;
+            const currentDate = getTodayDateString();
+              // 构建本地记录格式
+            const newRecord = {
+              id: apiRecord._id,
+              type: englishToChineseMap[apiRecord.meal_type] || apiRecord.meal_type,
+              name: apiRecord.food_name,
+              calories: apiRecord.calories,
+              timestamp: new Date(apiRecord.created_at).toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+              }).replace(/\//g, '-')
+            };
+            
+            // 查找今天的记录
+            const todayIndex = mealHistory.value.findIndex(day => day.date === currentDate);
+            
+            if (todayIndex >= 0) {
+              // 今天已有记录，添加到今天的记录中
+              mealHistory.value[todayIndex].meals.push(newRecord);
+            } else {
+              // 今天没有记录，新建今天的记录
+              mealHistory.value.unshift({
+                date: currentDate,
+                meals: [newRecord]
+              });
+            }
+            
+            resolve(newRecord);
+          } else {
+            console.error('添加饮食记录失败:', res);
+            reject(new Error('添加饮食记录失败'));
+          }
+        },
+        fail: (error) => {
+          console.error('API调用失败:', error);
+          reject(error);
         }
-        return true;
-      }
-    }
-    return false;
+      });
+    });
+  };  // 删除饮食记录
+  const deleteMealRecord = (date, id) => {
+    return new Promise((resolve, reject) => {
+      console.log('deleteMealRecord 开始删除记录');
+      console.log('删除参数 - date:', date);
+      console.log('删除参数 - id:', id);
+      console.log('JWT Token:', uni.getStorageSync('jwtToken'));
+      
+      const requestData = {
+        record_id: id
+      };
+      console.log('请求数据:', requestData);
+      
+      uni.request({
+        url: 'https://api.fanovian.cc:3000/api/diet/delete',
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + uni.getStorageSync('jwtToken')
+        },
+        data: requestData,
+        success: (res) => {
+          if (res.statusCode === 200 && res.data.success) {
+            // API 删除成功后，删除本地数据
+            const dayIndex = mealHistory.value.findIndex(day => day.date === date);
+            if (dayIndex !== -1) {
+              const meals = mealHistory.value[dayIndex].meals;
+              const mealIndex = meals.findIndex(meal => meal.id === id);
+              if (mealIndex !== -1) {
+                meals.splice(mealIndex, 1);
+                // 如果该天没有记录了，移除整天
+                if (meals.length === 0) {
+                  mealHistory.value.splice(dayIndex, 1);
+                }
+                resolve(true);
+              } else {
+                resolve(false);
+              }
+            } else {
+              resolve(false);
+            }
+          } else {
+            console.error('删除饮食记录失败:', res);
+            reject(new Error('删除饮食记录失败'));
+          }
+        },
+        fail: (error) => {
+          console.error('API调用失败:', error);
+          reject(error);
+        }
+      });
+    });
   };
 
   // 更新用户的每日热量目标
