@@ -1,49 +1,10 @@
-<script setup>
-import { ref } from 'vue'
-
-const userInfo = ref({
-  tel: '12345678901',
-  name: '健康达人',
-  age: 25,
-  gender: '男',
-  height: 170,
-  weightGoal: '68',
-  password: '123456'
-})
-
-const showEditName = ref(false)
-// const showEditPassword = ref(false)
-const showEditProfile = ref(false)
-const tempValue = ref('')
-const tempname = ref('')
-
-function openEdit(field) {
-  showEditProfile.value = field
-  tempValue.value = userInfo.value[field]
-}
-function saveEdit(field) {
-  userInfo.value[field] = tempValue.value
-  showEditProfile.value = false
-}
-function openEditName() {
-  showEditName.value = true
-  tempname.value = userInfo.value.name
-}
-function saveEditName() {
-  userInfo.value.name = tempname.value
-  showEditName.value = false
-}
-function logout() {
-  uni.removeStorageSync('jwtToken')
-  uni.reLaunch({ url: '/pages/login/index' })
-}
-</script>
-
 <template>
   <view class="container">
     <view class="user-info">
-      <text class="username">{{ userInfo.name }}</text>
-      <button class="edit-btn" @click="openEditName">修改</button>
+      <view class="username-row">
+        <text class="username">{{ userInfo.name }}</text>
+        <button class="edit-btn edit-btn-inline" @click="openEdit('name')">修改</button>
+      </view>
     </view>
 
     <view class="profile-list">
@@ -102,22 +63,28 @@ function logout() {
       </view>
     </view>
 
-    <!-- 修改用户名弹窗 -->
-    <uni-popup v-model="showEditName" type="dialog">
-      <view class="popup-content" v-if="showEditName">
-        <input type="text" v-model="tempname" placeholder="请输入新用户名" />
-        <button class="save-btn" @click="saveEditName">保存</button>
-      </view>
-    </uni-popup> 
-
-    <!-- 修改资料弹窗 -->
+    <button class="logout-btn" @click="logout" style="margin-top: 10rpx; margin-bottom: 40rpx;">退出登录</button>
+    <!-- 统一资料弹窗 -->
     <uni-popup v-model="showEditProfile" type="dialog">
+      <view class="popup-content" v-if="showEditProfile === 'name'">
+        <view class="input-row">
+          <text class="input-label">新昵称</text>
+          <input type="text" v-model="tempValue" placeholder="请输入新用户名" class="popup-input" />
+        </view>
+        <button class="save-btn" @click="saveEdit('name')">保存</button>
+      </view>
       <view class="popup-content" v-if="showEditProfile === 'password'">
-        <input v-model="tempValue" type="number" placeholder="请输入新密码" />
-        <button class="save-btn" style="width: 80%;"@click="saveEdit('password')" >保存</button>
+        <view class="input-row">
+          <text class="input-label">新密码</text>
+          <input v-model="tempValue" type="number" placeholder="请输入新密码" class="popup-input" />
+        </view>
+        <button class="save-btn" style="width: 80%;" @click="saveEdit('password')">保存</button>
       </view>
       <view class="popup-content" v-if="showEditProfile === 'age'">
-        <input v-model="tempValue" type="number" placeholder="请输入年龄" />
+        <view class="input-row">
+          <text class="input-label">年龄</text>
+          <input v-model="tempValue" type="number" placeholder="请输入年龄" class="popup-input" />
+        </view>
         <button class="save-btn" style="width: 80%;" @click="saveEdit('age')">保存</button>
       </view>
       <view class="popup-content" v-if="showEditProfile === 'gender'">
@@ -127,18 +94,53 @@ function logout() {
         <button class="save-btn" style="width: 80%;" @click="saveEdit('gender')">保存</button>
       </view>
       <view class="popup-content" v-if="showEditProfile === 'height'">
-        <input v-model="tempValue" type="number" placeholder="请输入身高(cm)" />
+        <view class="input-row">
+          <text class="input-label">身高</text>
+          <input v-model="tempValue" type="number" placeholder="请输入身高(cm)" class="popup-input" />
+        </view>
         <button class="save-btn" style="width: 80%;" @click="saveEdit('height')">保存</button>
       </view>
       <view class="popup-content" v-if="showEditProfile === 'weightGoal'">
-        <input v-model="tempValue" type="number" placeholder="请输入体重目标(kg)" />
+        <view class="input-row">
+          <text class="input-label">目标体重</text>
+          <input v-model="tempValue" type="number" placeholder="请输入体重目标(kg)" class="popup-input" />
+        </view>
         <button class="save-btn" style="width: 80%;" @click="saveEdit('weightGoal')">保存</button>
       </view>
     </uni-popup>
     <view style="flex:1"></view>
-    <button class="logout-btn" @click="logout">退出登录</button>
   </view>
 </template>
+
+<script setup>
+import { ref } from 'vue'
+
+const userInfo = ref({
+  tel: '12345678901',
+  name: '健康达人',
+  age: 25,
+  gender: '男',
+  height: 170,
+  weightGoal: '68',
+  password: '123456'
+})
+
+const showEditProfile = ref(false)
+const tempValue = ref('')
+
+function openEdit(field) {
+  showEditProfile.value = field
+  tempValue.value = userInfo.value[field]
+}
+function saveEdit(field) {
+  userInfo.value[field] = tempValue.value
+  showEditProfile.value = false
+}
+function logout() {
+  uni.removeStorageSync('jwtToken')
+  uni.reLaunch({ url: '/pages/login/index' })
+}
+</script>
 
 <style scoped>
 .container {
@@ -151,13 +153,60 @@ function logout() {
 .user-info {
   text-align: center;
   margin-bottom: 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18rpx;
+}
+.username-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
 }
 .username {
   display: block;
   font-size: 36rpx;
   color: #388e3c;
   font-weight: bold;
-  margin-bottom: 10rpx;
+  margin-bottom: 0;
+}
+.edit-btn {
+  color: #43a047;
+  background: #e8f5e9;
+  border: none;
+  font-size: 24rpx;
+  border-radius: 10rpx;
+  padding: 4rpx 18rpx;
+  margin-left: 8rpx;
+  font-weight: 400;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.edit-btn-inline {
+  background: none;
+  color: #43a047;
+  font-size: 24rpx;
+  padding: 0 10rpx;
+  border-radius: 8rpx;
+  margin-left: 8rpx;
+  box-shadow: none;
+  font-weight: 400;
+}
+.user-info .edit-btn:not(.edit-btn-inline) {
+  font-size: 30rpx;
+  padding: 12rpx 48rpx;
+  background: linear-gradient(90deg, #43a047 0%, #66bb6a 100%);
+  color: #fff;
+  font-weight: bold;
+  border-radius: 18rpx;
+  margin-left: 0;
+  margin-top: 0;
+  box-shadow: 0 2px 8px rgba(76,175,80,0.10);
+}
+.user-info .edit-btn:active {
+  background: #388e3c;
 }
 .profile-list {
   background: #fff;
@@ -185,15 +234,6 @@ function logout() {
 .label {
   color: #388e3c;
   font-size: 28rpx;
-}
-.edit-btn {
-  color: #43a047;
-  background: none;
-  border: none;
-  font-size: 24rpx;
-  text-decoration: underline;
-  cursor: pointer;
-  padding: 0 8rpx;
 }
 .item-right {
   flex: 1;
@@ -226,6 +266,28 @@ function logout() {
   flex-direction: column;
   gap: 20rpx;
   align-items: center;
+}
+.input-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  margin-bottom: 10rpx;
+}
+.input-label {
+  min-width: 80rpx;
+  color: #388e3c;
+  font-size: 28rpx;
+  text-align: right;
+}
+.popup-input {
+  flex: 1;
+  border: 1px solid #d0e6d6;
+  border-radius: 10rpx;
+  padding: 14rpx 18rpx;
+  font-size: 28rpx;
+  background: #f8fff9;
+  color: #333;
 }
 .save-btn {
   background: #43a047;
