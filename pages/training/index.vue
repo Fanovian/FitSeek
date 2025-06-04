@@ -11,9 +11,11 @@ const trainingStore = useTrainingStore();
 const { 
   workoutRecords, 
   workoutTypes, 
+  trainLibrary,
   fetchWorkoutRecords, 
   addWorkoutRecord: storeAddWorkoutRecord,
   deleteWorkoutRecord,
+  fetchTrainLibrary,
   getWorkoutTypeIcon 
 } = trainingStore;
 
@@ -62,9 +64,10 @@ const handleDeleteRecord = async (id) => {
 };
 
 // 页面加载时获取数据
-onMounted(() => {
+onMounted(async () => {
   try {
-    fetchWorkoutRecords();
+    await fetchWorkoutRecords();
+    await fetchTrainLibrary();
   } catch (error) {
     errorReport(error, 'onMounted', '/pages/training/index');
   }
@@ -80,11 +83,11 @@ onMounted(() => {
     <view class="add-workout-section" v-if="!showAddForm">
       <button class="add-workout-btn" @click="showAddForm = true">+ 添加锻炼记录</button>
     </view>
-    
-    <!-- 添加锻炼记录表单 -->
+      <!-- 添加锻炼记录表单 -->
     <workout-form 
       v-if="showAddForm"
       :workout-types="workoutTypes"
+      :train-library="trainLibrary"
       @submit="addWorkoutRecord"
       @cancel="showAddForm = false"
     />

@@ -5,9 +5,11 @@ import { ref, computed } from 'vue';
 export const useRecipeStore = () => {
   // 模拟用户配置的每日热量目标
   const calorieTarget = ref(2000);
-  
-  // 所有饮食历史记录
+    // 所有饮食历史记录
   const mealHistory = ref([]);
+
+  // 预设食物库
+  const foodLibrary = ref([]);
 
   // 饮食类型选项
   const mealTypes = [
@@ -238,6 +240,44 @@ export const useRecipeStore = () => {
     });
   };
 
+  // 获取预设食物库
+  const fetchFoodLibrary = () => {
+    return new Promise((resolve, reject) => {
+      uni.request({
+        url: 'https://api.fanovian.cc:3000/api/foodlib/get',
+        method: 'GET',
+        header: {
+          'Content-Type': 'application/json'
+        },
+        success: (res) => {
+          console.log('fetchFoodLibrary API 返回值:', res);
+          console.log('fetchFoodLibrary 数据:', res.data);
+          
+          if (res.statusCode === 200 && res.data.success) {
+            const foods = res.data.foods || [];
+            foodLibrary.value = foods.map(food => ({
+              id: food._id,
+              name: food.name,
+              calories: food.calories,
+              category: food.category,
+              note: food.note || ''
+            }));
+            resolve(foodLibrary.value);
+          } else {
+            console.error('获取食物库失败:', res);
+            foodLibrary.value = [];
+            resolve([]);
+          }
+        },
+        fail: (error) => {
+          console.error('获取食物库API调用失败:', error);
+          foodLibrary.value = [];
+          resolve([]);
+        }
+      });
+    });
+  };
+
   // 更新用户的每日热量目标
   const updateCalorieTarget = (newTarget) => {
     // 实际项目中应该发送请求到后端更新
@@ -286,11 +326,11 @@ export const useRecipeStore = () => {
     const mealType = mealTypes.find(item => item.value === type);
     return mealType ? mealType.icon : 'static/icons/recipe/addition.svg';
   };
-
   return {
     calorieTarget,
     mealHistory,
     mealTypes,
+    foodLibrary,
     todayCalorieIntake,
     fetchMealHistory,
     addMealRecord,
@@ -298,6 +338,7 @@ export const useRecipeStore = () => {
     updateCalorieTarget,
     getTodayDateString,
     formatDateDisplay,
-    getMealTypeIcon
+    getMealTypeIcon,
+    fetchFoodLibrary
   };
 };

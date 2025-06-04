@@ -3,6 +3,10 @@ import { ref, computed } from 'vue';
 
 // 创建一个可以在组件外部使用的响应式状态
 const workoutRecords = ref([]);
+
+// 预设训练库
+const trainLibrary = ref([]);
+
 // 用户的训练目标
 const trainingTarget = ref({
   weeklyMinutes: 120  // 每周锻炼总时长目标（分钟）
@@ -219,6 +223,42 @@ export const useTrainingStore = () => {
           reject(error);
         }
       });
+    });  };
+  
+  // 获取预设训练库
+  const fetchTrainLibrary = () => {
+    return new Promise((resolve, reject) => {
+      uni.request({
+        url: 'https://api.fanovian.cc:3000/api/trainlib/get',
+        method: 'GET',
+        header: {
+          'Content-Type': 'application/json'
+        },
+        success: (res) => {
+          console.log('fetchTrainLibrary API 返回值:', res);
+          console.log('fetchTrainLibrary 数据:', res.data);
+          
+          if (res.statusCode === 200 && res.data.success) {
+            const trains = res.data.trains || [];
+            trainLibrary.value = trains.map(train => ({
+              id: train._id,
+              name: train.name,
+              category: train.category,
+              note: train.note || ''
+            }));
+            resolve(trainLibrary.value);
+          } else {
+            console.error('获取训练库失败:', res);
+            trainLibrary.value = [];
+            resolve([]);
+          }
+        },
+        fail: (error) => {
+          console.error('获取训练库API调用失败:', error);
+          trainLibrary.value = [];
+          resolve([]);
+        }
+      });
     });
   };
   
@@ -264,15 +304,16 @@ export const useTrainingStore = () => {
       })
       .reduce((total, record) => total + parseInt(record.duration), 0);
   });
-  
-  return {
+    return {
     workoutRecords,
     workoutTypes,
+    trainLibrary,
     trainingTarget,
     weeklyMinutesCompleted,
     fetchWorkoutRecords,
     addWorkoutRecord,
     deleteWorkoutRecord,
+    fetchTrainLibrary,
     getWorkoutTypeIcon,
     formatDate,
     fetchTrainingTarget,

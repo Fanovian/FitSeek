@@ -12,12 +12,14 @@ const {
   calorieTarget, 
   mealHistory, 
   mealTypes, 
+  foodLibrary,
   todayCalorieIntake,
   fetchMealHistory, 
   addMealRecord, 
   deleteMealRecord,
   updateCalorieTarget,
-  formatDateDisplay
+  formatDateDisplay,
+  fetchFoodLibrary
 } = recipeStore;
 
 // 是否显示添加表单
@@ -84,9 +86,10 @@ const handleUpdateTarget = (newTarget) => {
 };
 
 // 页面加载时获取数据
-onMounted(() => {
+onMounted(async () => {
   try {
-    fetchMealHistory();
+    await fetchMealHistory();
+    await fetchFoodLibrary();
   } catch (error) {
     errorReport(error, 'onMounted', '/pages/recipe/index');
   }
@@ -106,11 +109,11 @@ onMounted(() => {
     <view class="add-meal-section" v-if="!showAddForm">
       <button class="add-meal-btn" @click="showAddForm = true">+ 添加饮食记录</button>
     </view>
-    
-    <!-- 添加饮食记录表单 -->
+      <!-- 添加饮食记录表单 -->
     <meal-form 
       v-if="showAddForm"
       :meal-types="mealTypes"
+      :food-library="foodLibrary"
       @submit="addMeal"
       @cancel="showAddForm = false"
     />
