@@ -8,7 +8,7 @@
 
 - **方法名**: `fetchWeightRecords`
 - **请求方式**: `GET`
-- **接口地址**: `http://123.206.217.44:3000/api/weight/records`
+- **接口地址**: `https://api.fanovian.cc:3000/api/weight/records`
 - **请求头**: 
   - `Authorization`: JWT Token（从本地存储获取）
 - **返回数据**:
@@ -23,7 +23,7 @@
   async fetchWeightRecords() {
     try {
       const res = await uni.request({
-        url: 'http://123.206.217.44:3000/api/weight/records',
+        url: 'https://api.fanovian.cc:3000/api/weight/records',
         method: 'GET',
         header: {
           Authorization: uni.getStorageSync('jwtToken') || ''
@@ -44,7 +44,7 @@
 
 - **方法名**: `fetchBodyFatRecords`
 - **请求方式**: `GET`
-- **接口地址**: `http://123.206.217.44:3000/api/bodyfat/records`
+- **接口地址**: `https://api.fanovian.cc:3000/api/bodyfat/records`
 - **请求头**: 
   - `Authorization`: JWT Token（从本地存储获取）
 - **返回数据**:
@@ -59,7 +59,7 @@
   async fetchBodyFatRecords() {
     try {
       const res = await uni.request({
-        url: 'http://123.206.217.44:3000/api/bodyfat/records',
+        url: 'https://api.fanovian.cc:3000/api/bodyfat/records',
         method: 'GET',
         header: {
           Authorization: uni.getStorageSync('jwtToken') || ''
@@ -80,7 +80,7 @@
 
 - **方法名**: `fetchTrainingRecords`
 - **请求方式**: `GET`
-- **接口地址**: `http://123.206.217.44:3000/api/training/records`
+- **接口地址**: `https://api.fanovian.cc:3000/api/training/records`
 - **请求头**: 
   - `Authorization`: JWT Token（从本地存储获取）
 - **返回数据**:
@@ -95,7 +95,7 @@
   async fetchTrainingRecords() {
     try {
       const res = await uni.request({
-        url: 'http://123.206.217.44:3000/api/training/records',
+        url: 'https://api.fanovian.cc:3000/api/training/records',
         method: 'GET',
         header: {
           Authorization: uni.getStorageSync('jwtToken') || ''

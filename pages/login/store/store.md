@@ -4,7 +4,7 @@
 
 ## 1. 登录接口
 
-- **URL**: `http://123.206.217.44:3000/api/auth/login`
+- **URL**: `https://api.fanovian.cc:3000/api/auth/login`
 - **方法**: `POST`
 - **请求体**:
   ```json
@@ -32,7 +32,7 @@
 - **前端调用示例**:
   ```js
   const response = await uni.request({
-    url: 'http://123.206.217.44:3000/api/auth/login',
+    url: 'https://api.fanovian.cc:3000/api/auth/login',
     method: 'POST',
     data: {
       type: parseInt(loginType.value),
@@ -50,7 +50,7 @@
 
 ## 2. 注册接口
 
-- **URL**: `http://123.206.217.44:3000/api/auth/register`
+- **URL**: `https://api.fanovian.cc:3000/api/auth/register`
 - **方法**: `POST`
 - **请求体**:
   ```json
@@ -77,7 +77,7 @@
 - **前端调用示例**:
   ```js
   const response = await uni.request({
-    url: 'http://123.206.217.44:3000/api/auth/register',
+    url: 'https://api.fanovian.cc:3000/api/auth/register',
     method: 'POST',
     data: {
       tel: registerTel.value,
