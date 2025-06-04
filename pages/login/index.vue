@@ -74,19 +74,28 @@ export default {
         errorMessage.value = '请输入手机号/用户名和密码';
         return;
       }
-      try {
-        const response = await uni.request({
-          url: 'https://api.fanovian.cc:3000/api/auth/login',
+      try {        const response = await uni.request({
+          url: 'https://api.fanovian.cc:3000/api/auth/login', // 使用HTTP
           method: 'POST',
           data: {
             type: parseInt(loginType.value),
             value: value.value,
             password: password.value
           }
-        });
-        if (response.data.success) {
+        });if (response.data.success) {
           const token = response.data.token;
           uni.setStorageSync('jwtToken', token);
+          console.log('JWT Token:', uni.getStorageSync('jwtToken'))
+          
+          // 保存用户信息用于资料页面
+          const userInfo = {
+            tel: loginType.value === '0' ? value.value : '', // 如果是手机号登录则保存手机号
+            name: loginType.value === '1' ? value.value : '', // 如果是用户名登录则保存用户名
+            loginValue: value.value, // 保存登录时使用的值
+            loginType: loginType.value
+          };
+          uni.setStorageSync('userInfo', userInfo);
+          
           uni.showToast({ title: '登录成功', icon: 'success' });
           uni.switchTab({ url: '/pages/home/index' });
         } else {

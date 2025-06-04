@@ -4,6 +4,7 @@ import { useRecipeStore } from './store/recipe.js';
 import MealForm from './components/MealForm.vue';
 import MealHistory from './components/MealHistory.vue';
 import MealStats from './components/MealStats.vue';
+import errorReport from '@/utils/errorReport.js';
 
 // 使用饮食记录状态管理
 const recipeStore = useRecipeStore();
@@ -24,41 +25,57 @@ const showAddForm = ref(false);
 
 // 添加新的饮食记录
 const addMeal = (formData) => {
-  // 创建新记录并添加到store
-  addMealRecord(formData);
-  
-  // 关闭表单
-  showAddForm.value = false;
-  
-  uni.showToast({
-    title: '添加成功',
-    icon: 'success'
-  });
+  try {
+    // 创建新记录并添加到store
+    addMealRecord(formData);
+    
+    // 关闭表单
+    showAddForm.value = false;
+    
+    uni.showToast({
+      title: '添加成功',
+      icon: 'success'
+    });
+  } catch (error) {
+    errorReport(error, 'addMeal', '/pages/recipe/index');
+  }
 };
 
 // 处理删除饮食记录
 const handleDeleteRecord = ({ date, id }) => {
-  if (deleteMealRecord(date, id)) {
-    uni.showToast({
-      title: '删除成功',
-      icon: 'success'
-    });
+  try {
+    if (deleteMealRecord(date, id)) {
+      uni.showToast({
+        title: '删除成功',
+        icon: 'success'
+      });
+    }
+  } catch (error) {
+    errorReport(error, 'handleDeleteRecord', '/pages/recipe/index');
   }
 };
 
 // 处理更新热量目标
 const handleUpdateTarget = (newTarget) => {
-  if (updateCalorieTarget(newTarget)) {
-    uni.showToast({
-      title: '目标已更新',
-      icon: 'success'
-    });
+  try {
+    if (updateCalorieTarget(newTarget)) {
+      uni.showToast({
+        title: '目标已更新',
+        icon: 'success'
+      });
+    }
+  } catch (error) {
+    errorReport(error, 'handleUpdateTarget', '/pages/recipe/index');
   }
 };
 
 // 页面加载时获取数据
 onMounted(() => {
-  fetchMealHistory();
+  try {
+    fetchMealHistory();
+  } catch (error) {
+    errorReport(error, 'onMounted', '/pages/recipe/index');
+  }
 });
 </script>
 
