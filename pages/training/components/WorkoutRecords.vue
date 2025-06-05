@@ -109,10 +109,12 @@ const editWorkout = (workout) => {
           </view>
         </view>
       </view>
-      
-      <!-- 每日合计 -->
+        <!-- 每日合计 -->
       <view class="daily-total">
-        <text>合计: {{ day.workouts.reduce((sum, workout) => sum + parseInt(workout.duration || 0), 0) }} 分钟</text>
+        <text>合计: {{ day.workouts.reduce((sum, workout) => {
+          const duration = parseInt(workout.duration || 0);
+          return sum + (isNaN(duration) ? 0 : duration);
+        }, 0) }} 分钟</text>
       </view>
     </view>
 

@@ -71,8 +71,7 @@ export const useTrainingStore = () => {
               'streching': 'stretch',
               'other': 'other'
             };
-            
-            // 将API数据转换为本地数据结构
+              // 将API数据转换为本地数据结构
             const formattedRecords = records.map(record => {
               const frontendType = backendToFrontendTypeMap[record.train_type] || 'other';
               return {
@@ -81,7 +80,8 @@ export const useTrainingStore = () => {
                 typeName: getWorkoutTypeName(record.train_type || 'other'),
                 content: record.content || '未知运动',
                 duration: record.duration ? record.duration.toString() : '0',
-                createdAt: record.time ? formatTimestamp(record.time) : formatDate(new Date())
+                createdAt: record.time ? formatTimestamp(record.time) : formatDate(new Date()),
+                originalTime: record.time // 保存原始时间用于计算
               };
             });
             
@@ -114,10 +114,9 @@ export const useTrainingStore = () => {
         'stretch': 'streching',
         'other': 'other'
       };
-      
-      const requestData = {
+        const requestData = {
         train_type: trainTypeMap[record.workoutType] || 'other',
-        duration: parseInt(record.duration),
+        duration: parseInt(record.duration) || 0,
         content: record.content
       };
       
@@ -138,15 +137,15 @@ export const useTrainingStore = () => {
           
           if (res.statusCode === 200 && res.data.success) {
             const apiRecord = res.data.record;
-            
-            // 构建本地记录格式
+              // 构建本地记录格式
             const newRecord = {
               id: apiRecord.record_id,
               workoutType: record.workoutType, // 保持前端类型
               typeName: record.typeName,
               content: apiRecord.content,
               duration: apiRecord.duration.toString(),
-              createdAt: apiRecord.time ? formatTimestamp(apiRecord.time) : formatDate(new Date())
+              createdAt: apiRecord.time ? formatTimestamp(apiRecord.time) : formatDate(new Date()),
+              originalTime: apiRecord.time // 保存原始时间用于计算
             };
             
             // 添加到本地状态的开头
@@ -179,11 +178,10 @@ export const useTrainingStore = () => {
         'stretch': 'streching',
         'other': 'other'
       };
-      
-      const requestData = {
+        const requestData = {
         record_id: recordId,
         train_type: trainTypeMap[record.workoutType] || 'other',
-        duration: parseInt(record.duration),
+        duration: parseInt(record.duration) || 0,
         content: record.content
       };
       
@@ -204,15 +202,15 @@ export const useTrainingStore = () => {
           
           if (res.statusCode === 200 && res.data.success) {
             const apiRecord = res.data.record;
-            
-            // 构建本地记录格式
+              // 构建本地记录格式
             const updatedRecord = {
               id: apiRecord.record_id,
               workoutType: record.workoutType, // 保持前端类型
               typeName: record.typeName,
               content: apiRecord.content,
               duration: apiRecord.duration.toString(),
-              createdAt: apiRecord.time ? formatTimestamp(apiRecord.time) : formatDate(new Date())
+              createdAt: apiRecord.time ? formatTimestamp(apiRecord.time) : formatDate(new Date()),
+              originalTime: apiRecord.time // 保存原始时间用于计算
             };
             
             // 更新本地数据
@@ -366,10 +364,9 @@ export const useTrainingStore = () => {
     }
     return Promise.reject(new Error('训练目标必须为正数'));
   };
+    // 该函数已移除 - 不再计算每周锻炼次数
   
-  // 该函数已移除 - 不再计算每周锻炼次数
-  
-  // 计算本周已完成的锻炼时长（分钟）
+  // 计算本周已完成的锻炼时长（分钟）  
   const weeklyMinutesCompleted = computed(() => {
     const now = new Date();
     const startOfWeek = new Date(now);
@@ -379,10 +376,23 @@ export const useTrainingStore = () => {
     // 筛选出本周的记录，并计算总时长
     return workoutRecords.value
       .filter(record => {
-        const recordDate = new Date(record.createdAt);
-        return recordDate >= startOfWeek;
+        // 优先使用原始时间进行比较，确保准确性
+        let recordDate;
+        if (record.originalTime) {
+          recordDate = new Date(record.originalTime);
+        } else {
+          // 兼容老数据：从格式化时间中提取日期部分
+          const recordDateString = record.createdAt.split(' ')[0];
+          recordDate = new Date(recordDateString);
+        }
+        
+        // 验证日期有效性并检查是否在本周范围内
+        return !isNaN(recordDate.getTime()) && recordDate >= startOfWeek;
       })
-      .reduce((total, record) => total + parseInt(record.duration), 0);
+      .reduce((total, record) => {
+        const duration = parseInt(record.duration || 0);
+        return total + (isNaN(duration) ? 0 : duration);
+      }, 0);
   });
     return {
     workoutRecords,
