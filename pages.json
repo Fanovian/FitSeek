@@ -32,7 +32,7 @@
 	  {
 		"path": "pages/recipe/index",
 		"style": {
-		  "navigationBarTitleText": "食谱推荐",
+		  "navigationBarTitleText": "食谱记录",
 		  "backgroundColor": "#f0fff0"
 		}
 	  },

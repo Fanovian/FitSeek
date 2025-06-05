@@ -29,7 +29,7 @@ export const useTrainingStore = () => {
       'aerobic': '有氧',
       'anaerobic': '无氧',
       'stretch': '拉伸',
-      'streching': '拉伸',
+      'stretching': '拉伸',
       'other': '其他'
     };
     return typeMapping[type] || '其他';
@@ -68,7 +68,7 @@ export const useTrainingStore = () => {
             const backendToFrontendTypeMap = {
               'aerobic': 'cardio',
               'anaerobic': 'strength',
-              'streching': 'stretch',
+              'stretching': 'stretch',
               'other': 'other'
             };
               // 将API数据转换为本地数据结构
@@ -111,7 +111,7 @@ export const useTrainingStore = () => {
       const trainTypeMap = {
         'cardio': 'aerobic',
         'strength': 'anaerobic', 
-        'stretch': 'streching',
+        'stretch': 'stretching',
         'other': 'other'
       };
         const requestData = {
@@ -175,7 +175,7 @@ export const useTrainingStore = () => {
       const trainTypeMap = {
         'cardio': 'aerobic',
         'strength': 'anaerobic', 
-        'stretch': 'streching',
+        'stretch': 'stretching',
         'other': 'other'
       };
         const requestData = {

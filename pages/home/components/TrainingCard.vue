@@ -30,7 +30,7 @@ export default {
       return {
         aerobic: '有氧',
         anaerobic: '无氧',
-        streching: '拉伸',
+        stretching: '拉伸',
         other: '其他'
       };
     },
