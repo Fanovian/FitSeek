@@ -6,10 +6,6 @@
           <text class="value">{{ item.value }}bpm</text>
           <text :class="{ positive: item.change.startsWith('+'), negative: item.change.startsWith('-') }">{{ item.change }}</text>
         </view>
-        <view class="action-buttons">
-          <text class="modify-btn" @click.stop="modifyRecord(item)">修改</text>
-          <text class="delete-btn" @click.stop="deleteRecord(item)">删除</text>
-        </view>
       </view>
     </view>
   </view>
@@ -33,12 +29,7 @@ export default {
       uni.navigateTo({
         url: '/pages/home/heart_rate_detail?data=' + encodeURIComponent(JSON.stringify(this.records))
       });
-    },    deleteRecord(item) {
-      this.$emit('delete', item.id);
     },
-    modifyRecord(item) {
-      this.$emit('modify', item);
-    }
   }
 }
 </script>
