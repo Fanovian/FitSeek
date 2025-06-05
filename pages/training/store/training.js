@@ -131,7 +131,7 @@ export const useTrainingStore = () => {
             
             // 构建本地记录格式
             const newRecord = {
-              id: apiRecord._id || apiRecord.record_id,
+              id: apiRecord.record_id,
               workoutType: record.workoutType, // 保持前端类型
               typeName: record.typeName,
               content: apiRecord.content,

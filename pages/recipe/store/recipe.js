@@ -147,7 +147,7 @@ export const useRecipeStore = () => {
             const currentDate = getTodayDateString();
               // 构建本地记录格式
             const newRecord = {
-              id: apiRecord._id,
+              id: apiRecord.record_id,
               type: englishToChineseMap[apiRecord.meal_type] || apiRecord.meal_type,
               name: apiRecord.food_name,
               calories: apiRecord.calories,
