@@ -57,23 +57,33 @@ export const useTrainingStore = () => {
         header: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + uni.getStorageSync('jwtToken')
-        },        
-        success: (res) => {
+        },          success: (res) => {
           console.log('fetchWorkoutRecords API 返回值:', res);
           console.log('fetchWorkoutRecords 数据:', res.data);
           
           if (res.statusCode === 200 && res.data.success) {
             const records = res.data.records || [];
             
+            // 后端类型到前端类型的反向映射
+            const backendToFrontendTypeMap = {
+              'aerobic': 'cardio',
+              'anaerobic': 'strength',
+              'streching': 'stretch',
+              'other': 'other'
+            };
+            
             // 将API数据转换为本地数据结构
-            const formattedRecords = records.map(record => ({
-              id: record.record_id,
-              workoutType: record.train_type || 'other',
-              typeName: getWorkoutTypeName(record.train_type || 'other'),
-              content: record.content || '未知运动',
-              duration: record.duration ? record.duration.toString() : '0',
-              createdAt: record.time ? formatTimestamp(record.time) : formatDate(new Date())
-            }));
+            const formattedRecords = records.map(record => {
+              const frontendType = backendToFrontendTypeMap[record.train_type] || 'other';
+              return {
+                id: record.record_id,
+                workoutType: frontendType, // 使用前端类型
+                typeName: getWorkoutTypeName(record.train_type || 'other'),
+                content: record.content || '未知运动',
+                duration: record.duration ? record.duration.toString() : '0',
+                createdAt: record.time ? formatTimestamp(record.time) : formatDate(new Date())
+              };
+            });
             
             workoutRecords.value = formattedRecords;
             resolve(formattedRecords);
