@@ -1,4 +1,7 @@
+<!-- MealHistory.vue -->
+<!-- 饮食历史记录组件，按天分组展示饮食记录，支持编辑与删除。 -->
 <script setup>
+// 组件逻辑：props 传入历史数组和日期格式化方法，emit 事件，含删除/编辑操作
 import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
@@ -39,8 +42,9 @@ const editMeal = (meal) => {
 </script>
 
 <template>
+  <!-- 饮食历史主区域 -->
   <view>
-    <!-- 历史记录列表 -->
+    <!-- 按天分组的饮食记录 -->
     <view v-for="day in mealHistory" :key="day.date" class="day-section">
       <view class="day-header">
         <text class="day-title">{{ formatDateDisplay(day.date) }}</text>
@@ -63,13 +67,13 @@ const editMeal = (meal) => {
         </view>
       </view>
       
-      <!-- 每日合计 -->
+      <!-- 每日合计热量 -->
       <view class="daily-total">
         <text>合计: {{ day.meals.reduce((sum, meal) => sum + meal.calories, 0) }} kcal</text>
       </view>
     </view>
 
-    <!-- 没有记录的提示 -->
+    <!-- 无记录时的提示 -->
     <view v-if="mealHistory.length === 0" class="empty-records">
       <text class="empty-text">暂无饮食记录，点击上方按钮添加</text>
     </view>

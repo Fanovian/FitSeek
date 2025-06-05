@@ -1,4 +1,7 @@
+<!-- WorkoutForm.vue -->
+<!-- 锻炼记录表单组件，支持添加/编辑锻炼内容、类型、时长，含下拉选择与表单校验。 -->
 <script setup>
+// 组件逻辑：props 传入类型/库/编辑项，emit 事件，含表单数据、校验、下拉、提交/取消等
 import { ref, defineProps, defineEmits, computed, watch } from 'vue';
 
 const props = defineProps({
@@ -157,28 +160,16 @@ const cancelForm = () => {
   emit('cancel');
 };
 </script>
-
-<template>  <view class="form-section">
+<template>
+  <!-- 锻炼表单主区域 -->
+  <view class="form-section">
+    <!-- 表单头部 -->
     <view class="form-header">
       <text class="form-title">{{ isEditing ? '修改锻炼记录' : '添加锻炼记录' }}</text>
     </view>
     
+    <!-- 训练内容输入区 -->
     <view class="form-item">
-      <text class="form-label">锻炼类型</text>
-      <view class="workout-types-container">
-        <view 
-          v-for="type in workoutTypes" 
-          :key="type.value" 
-          class="workout-type-item" 
-          :class="{ 'active': formData.workoutType === type.value }"
-          @click="formData.workoutType = type.value"
-        >
-          <image :src="`/static/icons/training/${type.value}.svg`" class="workout-type-icon"></image>
-          <text class="workout-type-label">{{ type.label }}</text>
-        </view>
-      </view>
-    </view>
-      <view class="form-item">
       <text class="form-label">锻炼内容</text>
       
       <view class="content-input-container">
@@ -213,6 +204,7 @@ const cancelForm = () => {
       <text v-if="formErrors.content" class="error-text">{{ formErrors.content }}</text>
     </view>
     
+    <!-- 时长输入与错误提示 -->
     <view class="form-item">
       <text class="form-label">锻炼时长 (分钟)</text>
       <input type="number" v-model="formData.duration" placeholder="请输入锻炼时长" class="form-input" />

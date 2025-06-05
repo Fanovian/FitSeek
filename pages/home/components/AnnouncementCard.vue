@@ -1,16 +1,23 @@
+<!-- AnnouncementCard.vue -->
+<!-- 公告卡片组件，展示最新一条公告标题和日期，点击可跳转详情。 -->
 <template>
+  <!-- 公告卡片主容器 -->
   <view class="card announcement-card" @click="$emit('click')">
+    <!-- 公告标题 -->
     <view class="card-title">公告</view>
+    <!-- 公告内容区，显示最新公告或暂无公告 -->
     <view class="card-content">
       <view v-if="latest" class="record-line">
+        <!-- 公告标题与日期 -->
         <text>{{ getTitle(latest.content) }}</text>
-        <text class="date">{{ latest.publish_time.slice(0,10) }}</text>
+        <text class="date">{{ getDate(latest.publish_time) }}</text>
       </view>
       <view v-else class="record-line"><text>暂无公告</text></view>
     </view>
   </view>
 </template>
 <script>
+// 组件逻辑：props 传入公告数组，computed 取最新，methods 提供标题/日期格式化
 export default {
   props: { announcements: Array },
   computed: {
@@ -19,6 +26,16 @@ export default {
     }
   },
   methods: {
+    getDate(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      return date.toLocaleDateString('zh-CN', { timeZone: 'Asia/Shanghai' });
+    },
+    getTime(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Shanghai' });
+    },
     getTitle(md) {
       // 取markdown首行或前20字
       if (!md) return '';

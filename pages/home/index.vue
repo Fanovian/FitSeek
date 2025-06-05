@@ -1,5 +1,7 @@
 <!-- pages/home/index.vue -->
+<!-- 首页主页面，汇总展示各类健康卡片、公告、文章等，支持添加健康记录。 -->
 <template>
+  <!-- 首页主容器 -->
   <view class="container">
     <!-- 顶部信息栏 -->
     <view class="top-section">
@@ -55,6 +57,7 @@
 </template>
 
 <script>
+// 首页逻辑：引入各类卡片组件和添加表单，生命周期钩子刷新数据
 import WeightCard from '@/pages/home/components/WeightCard.vue';
 import BodyFatCard from '@/pages/home/components/BodyFatCard.vue';
 import TrainingCard from '@/pages/home/components/TrainingCard.vue';
@@ -135,7 +138,7 @@ export default {
               }
               return { 
                 id: r.record_id, 
-                date: r.time.slice(0, 10), 
+                // date: r.time.slice(0, 10), 
                 time: r.time,
                 value, 
                 originalValue: r.value,
@@ -254,10 +257,11 @@ export default {
                 change = (diff > 0 ? '+' : '') + diff + '%';
               } else {
                 change = '--';
-              }              return {
+              } 
+              return {
                 id: r.record_id,
-                time: r.time.replace('T', ' ').slice(0, 16),
-                originalTime: r.time,
+                time: r.time,
+                // originalTime: r.time,
                 value: r.value.toFixed(1),
                 originalValue: r.value,
                 change,
@@ -296,8 +300,8 @@ export default {
                 change = '--';
               }              return {
                 id: r.record_id,
-                time: r.time.replace('T', ' ').slice(0, 16),
-                originalTime: r.time,
+                time: r.time,
+                // originalTime: r.time,
                 value: r.value,
                 originalValue: r.value,
                 change,
@@ -423,7 +427,19 @@ export default {
     } catch (e) {
       errorReport(e, 'created lifecycle', '/pages/home/index');
     }
-  }
+  },
+  // 页面每次显示时都刷新数据，实现热更新
+  onShow() {
+    this.fetchProfile();
+    this.fetchCurrentWeightAndBMI();
+    this.fetchWeightRecords();
+    this.fetchBodyFatRecords();
+    this.fetchTrainingRecords();
+    this.fetchBloodOxygenRecords();
+    this.fetchHeartRateRecords();
+    this.fetchAnnouncements();
+    this.fetchArticles();
+  },
 };
 </script>
 

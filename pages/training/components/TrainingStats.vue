@@ -1,4 +1,7 @@
+<!-- TrainingStats.vue -->
+<!-- 训练统计组件，展示本周锻炼时长、目标及进度，支持目标设置。 -->
 <script setup>
+// 组件逻辑：computed 统计本周时长，ref 目标，进度计算与弹窗设置
 import { ref, computed } from 'vue';
 import { useTrainingStore } from '../store/training.js';
 
@@ -70,9 +73,10 @@ const progressPercentage = computed(() => {
   return Math.min(percentage, 100);
 });
 </script>
-
 <template>
+  <!-- 训练统计主容器 -->
   <view class="stats-container">
+    <!-- 标题与目标设置按钮 -->
     <view class="header">
       <view class="title-container">
         <view class="title-icon"></view>

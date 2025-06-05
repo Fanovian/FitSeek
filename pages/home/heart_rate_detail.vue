@@ -1,5 +1,9 @@
+<!-- heart_rate_detail.vue -->
+<!-- 心率详情页，展示心率变化趋势图、详细记录列表，并支持记录的修改与删除。 -->
 <template>
+  <!-- 心率详情主容器 -->
   <view class="detail-container">
+    <!-- 趋势图表区域 -->
     <view class="chart-container">
       <text>心率变化趋势图表</text>
       <qiun-data-charts
@@ -12,99 +16,99 @@
         :height="svgHeight"
       />
       <view class="trend">
-        <text v-if="trend > 0" class="positive">总体趋势：+{{ trend }}bpm</text>
-        <text v-else-if="trend < 0" class="negative">总体趋势：{{ trend }}bpm</text>
+        <text v-if="trend > 0" class="positive">总体趋势：+{{ trend }}%</text>
+        <text v-else-if="trend < 0" class="negative">总体趋势：{{ trend }}%</text>
         <text v-else>总体趋势：无变化</text>
       </view>
       <view class="chart-x-axis">
         <text v-for="(cat, idx) in chartData.categories" :key="idx" class="x-label">{{ cat }}</text>
       </view>
-      <view class="chart-y-axis">
-        <text>心率(bpm)</text>
-      </view>
-    </view>    <view class="record-list">
+      <view class="chart-y-axis"><!-- 删除纵坐标标识 --></view>
+    </view>    <!-- 记录列表区域 -->
+    <view class="record-list">
+      <!-- 单条心率记录，含时间、数值、操作按钮 -->
       <view v-for="(item, index) in detailedRecords" :key="index" class="record-item">
         <view class="record-info">
-          <text>{{ item.time }} - {{ item.value }}bpm</text>
-          <text :class="{ positive: item.change.startsWith('+'), negative: item.change.startsWith('-') }">
-            {{ item.change }}
-          </text>
+          <text>{{ getBeijingDate(item.time) + " " + getBeijingTime(item.time) }}</text>
+          <text>{{ item.value || item.duration }}</text>
         </view>
-        <view class="action-buttons">
-          <text class="modify-btn" @click="modifyRecord(item)">修改</text>
-          <text class="delete-btn" @click="deleteRecord(item.id)">删除</text>      </view>
-    </view>
-    
-    <!-- 修改记录模态框 -->
-    <view v-if="showModifyModal" class="modify-modal-mask" @click="closeModifyModal">
-      <view class="modify-modal" @click.stop>
-        <view class="modal-header">
-          <text class="modal-title">修改心率记录</text>
-          <text class="modal-close" @click="closeModifyModal">×</text>
+        <view class="action-buttons" style="z-index:1;">
+          <button class="modify-btn" @click="modifyRecord(item)">修改</button>
+          <button class="delete-btn" @click="deleteRecord(item.id)">删除</button>
         </view>
-        
-        <view class="modal-content">
-          <view class="input-group">
-            <text class="input-label">心率(bpm)</text>
-            <input 
-              type="digit" 
-              v-model="modifyForm.value" 
-              class="modal-input" 
-              placeholder="输入心率" 
-            />
+      </view>
+      <!-- 修改记录模态框 -->
+      <view v-if="showModifyModal" class="modify-modal-mask" @click="closeModifyModal" style="z-index:1000;">
+        <view class="modify-modal" @click.stop>
+          <view class="modal-header">
+            <text class="modal-title">修改记录</text>
+            <text class="modal-close" @click="closeModifyModal">×</text>
           </view>
-          
-          <view class="input-group">
-            <text class="input-label">日期</text>
-            <picker mode="date" :value="modifyForm.dateValue" @change="onModifyDateChange">
-              <view class="picker-display">
-                {{ modifyForm.dateValue || '选择日期' }}
-              </view>
-            </picker>
+          <view class="modal-content">
+            <!-- 时间选择器放在最上面 -->
+            <view class="input-group">
+              <text class="input-label">日期</text>
+              <picker mode="date" :value="modifyForm.dateValue" @change="onModifyDateChange">
+                <view class="picker-display">
+                  {{ modifyForm.dateValue || '选择日期' }}
+                </view>
+              </picker>
+            </view>
+            <view class="input-group">
+              <text class="input-label">时间</text>
+              <picker mode="time" :value="modifyForm.timeValue" @change="onModifyTimeChange">
+                <view class="picker-display">
+                  {{ modifyForm.timeValue || '选择时间' }}
+                </view>
+              </picker>
+            </view>
+            <view class="input-group">
+              <text class="input-label">数值</text>
+              <input type="digit" v-model="modifyForm.value" class="modal-input" placeholder="输入数值" />
+            </view>
+            <view class="input-group">
+              <text class="input-label">备注</text>
+              <input type="text" v-model="modifyForm.note" class="modal-input" placeholder="备注（可选）" />
+            </view>
           </view>
-          
-          <view class="input-group">
-            <text class="input-label">时间</text>
-            <picker mode="time" :value="modifyForm.timeValue" @change="onModifyTimeChange">
-              <view class="picker-display">
-                {{ modifyForm.timeValue || '选择时间' }}
-              </view>
-            </picker>
+          <view class="modal-footer">
+            <button class="modal-btn cancel-btn" @click="closeModifyModal">取消</button>
+            <button class="modal-btn confirm-btn" @click="modifyHealthRecord">确认</button>
           </view>
-          
-          <view class="input-group">
-            <text class="input-label">备注</text>
-            <input 
-              type="text" 
-              v-model="modifyForm.note" 
-              class="modal-input" 
-              placeholder="备注（可选）" 
-            />
-          </view>
-        </view>
-        
-        <view class="modal-footer">
-          <button class="modal-btn cancel-btn" @click="closeModifyModal">取消</button>
-          <button class="modal-btn confirm-btn" @click="modifyHealthRecord">确认</button>
         </view>
       </view>
     </view>
-  </view>
   </view>
 </template>
 
 <script>
+// 页面逻辑：支持通过参数或接口获取心率记录，渲染趋势图，支持记录的增删改，含表单与弹窗交互
 import QiunDataCharts from '@/uni_modules/qiun-data-charts/components/qiun-data-charts/qiun-data-charts.vue';
-import errorReport from '@/utils/errorReport.js';
 export default {
-  components: { 'qiun-data-charts': QiunDataCharts },  data() {
+  components: { 'qiun-data-charts': QiunDataCharts },
+  props: {
+    data: {
+      type: String,
+      default: ''
+    }
+  },
+  data() {
     const sysInfo = uni.getSystemInfoSync();
     const screenWidth = sysInfo.windowWidth || 375;
     return {
       detailedRecords: [],
       screenWidth,
       svgHeight: Math.max(160, Math.floor(screenWidth * 0.45)),
-      chartData: { categories: [], series: [] },      // 修改记录相关数据
+      chartData: { categories: [], series: [] },
+      chartOpts: {
+        color: ['#1976d2'],
+        padding: [15, 10, 0, 10],
+        enableScroll: true,
+        legend: false,
+        xAxis: { disableGrid: true },
+        yAxis: { min: null, gridType: 'dash', splitNumber: 4 },
+        extra: { line: { type: 'curve', width: 3, activeType: 'hollow' } }
+      },
       showModifyModal: false,
       modifyingRecord: null,
       modifyForm: {
@@ -119,153 +123,201 @@ export default {
   computed: {
     trend() {
       if (this.detailedRecords.length < 2) return 0;
-      const first = parseInt(this.detailedRecords[0].value);
-      const last = parseInt(this.detailedRecords[this.detailedRecords.length - 1].value);
-      return last - first;
+      const first = parseFloat(this.detailedRecords[0].value);
+      const last = parseFloat(this.detailedRecords[this.detailedRecords.length - 1].value);
+      return (last - first).toFixed(2);
     }
   },
   async created() {
-    await this.fetchHeartRateRecords();
-    await this.$nextTick();
-    this.initChart();
+    // 兼容通过页面参数 data 传递的 records
+    let records = [];
+    if (this.$route && this.$route.query && this.$route.query.data) {
+      try {
+        records = JSON.parse(decodeURIComponent(this.$route.query.data));
+      } catch (e) {
+        records = [];
+      }
+    } else if (this.$mp && this.$mp.query && this.$mp.query.data) {
+      try {
+        records = JSON.parse(decodeURIComponent(this.$mp.query.data));
+      } catch (e) {
+        records = [];
+      }
+    } else if (typeof getCurrentPages === 'function') {
+      const pages = getCurrentPages();
+      const current = pages[pages.length - 1];
+      if (current && current.options && current.options.data) {
+        try {
+          records = JSON.parse(decodeURIComponent(current.options.data));
+        } catch (e) {
+          records = [];
+        }
+      }
+    }
+    if (records && records.length) {
+      this.detailedRecords = records;
+      this.initChart();
+    } else {
+      await this.fetchBloodOxygenRecords();
+      await this.$nextTick();
+      this.initChart();
+    }
   },
   methods: {
-    async fetchHeartRateRecords() {
-      try {
-        const token = uni.getStorageSync('jwtToken');
-        const res = await uni.request({
-          url: 'https://api.fanovian.cc:3000/api/fitness/get',
-          method: 'GET',
-          header: {
-            Authorization: token ? 'Bearer ' + token : ''
+    getBeijingDate(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      const beijing = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+      return beijing.toISOString().slice(0, 10);
+    },
+    getBeijingTime(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      const beijing = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+      return beijing.toISOString().slice(11, 16);
+    },
+    async fetchBloodOxygenRecords() {
+      if (this.data) {
+        this.detailedRecords = JSON.parse(decodeURIComponent(this.data));
+      } else {
+        try {
+          const token = uni.getStorageSync('jwtToken');
+          const res = await uni.request({
+            url: 'https://api.fanovian.cc:3000/api/fitness/get',
+            method: 'GET',
+            header: {
+              Authorization: token ? 'Bearer ' + token : ''
+            }
+          });
+          if (res.data && res.data.success) {
+            const records = (res.data.records || []).filter(r => r.type === 'heart_rate')
+              .sort((a, b) => new Date(b.time) - new Date(a.time))
+              .map((r, i, arr) => {
+                let change = '';
+                if (i < arr.length - 1) {
+                  const diff = (r.value - arr[i + 1].value).toFixed(1);
+                  change = (diff > 0 ? '+' : '') + diff + '%';
+                } else {
+                  change = '--';
+                }
+                return {
+                  id: r.record_id,
+                  time: r.time,
+                  // originalTime: r.time,
+                  value: r.value.toFixed(1),
+                  originalValue: r.value,
+                  change,
+                  note: r.note || ''
+                };
+              });
+            this.detailedRecords = records;
           }
-        });
-        if (res.data && res.data.success) {
-          const records = (res.data.records || []).filter(r => r.type === 'heart_rate')
-            .sort((a, b) => new Date(b.time) - new Date(a.time))
-            .map((r, i, arr) => {
-              let change = '';
-              if (i < arr.length - 1) {
-                const diff = (r.value - arr[i + 1].value);
-                change = (diff > 0 ? '+' : '') + diff + 'bpm';
-              } else {
-                change = '--';
-              }              return {
-                id: r.record_id,
-                time: r.time.replace('T', ' ').slice(0, 16),
-                originalTime: r.time,
-                value: r.value,
-                originalValue: r.value,
-                change,
-                note: r.note || ''
-              };
-            });
-          this.detailedRecords = records;
+        } catch (e) {
+          this.detailedRecords = [];
         }
-      } catch (e) {
-        errorReport(e, 'fetchHeartRateRecords', '/pages/home/heart_rate_detail');
       }
     },
+
     initChart() {
-      // 横轴仅显示日期，纵轴为心率
-      const categories = this.detailedRecords.map(item => {
-        // 只取日期部分（如 '06-04'）
-        if (item.time) {
-          const d = item.time.split(' ')[0];
-          return d.length === 10 ? d.slice(5) : item.time;
-        }
-        return '';
+      // 横坐标（categories）按时间升序排列
+      const sortedRecords = [...this.detailedRecords].sort((a, b) => {
+        const dateA = new Date(a.date || a.time);
+        const dateB = new Date(b.date || b.time);
+        return dateA - dateB;
       });
-      const data = this.detailedRecords.map(item => parseInt(item.value) || 0);      this.chartData = {
+      const categories = sortedRecords.map(item => item.date && item.date.length === 10 ? item.date.slice(5) : (item.date || ''));
+      const data = sortedRecords.map(item => parseFloat(item.value || 0));
+      this.chartData = {
         categories,
         series: [{ name: '心率', data }]
       };
     },
-    
-    // 删除健康记录
-    async deleteHealthRecord(recordId) {
+
+    // 修改记录
+    modifyRecord(record) {
+      this.modifyingRecord = record;
+      // 修正：兼容 originalTime 和 time 字段，保证时间赋值正确
+      const timeStr = record.originalTime || record.time || '';
+      let dateValue = '', timeValue = '';
+      if (timeStr) {
+        // 兼容 ISO 字符串和带时区的字符串
+        const dateObj = new Date(timeStr);
+        dateValue = dateObj.toISOString().slice(0, 10);
+        timeValue = dateObj.toTimeString().slice(0, 5);
+      }
+      this.modifyForm = {
+        value: record.originalValue || record.value,
+        time: timeStr,
+        note: record.note || '',
+        dateValue,
+        timeValue
+      };
+      this.showModifyModal = true;
+    },
+
+    // 删除记录
+    async deleteRecord(recordId) {
       try {
-        const token = uni.getStorageSync('jwtToken');
-        const res = await uni.request({
-          url: 'https://api.fanovian.cc:3000/api/fitness/delete',
-          method: 'POST',
-          header: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-          },
-          data: {
-            record_id: recordId
-          }
+        const res = await uni.showModal({
+          title: '确认删除',
+          content: '确定要删除这条心率记录吗？',
+          confirmText: '删除',
+          confirmColor: '#ff3b30'
         });
         
-        if (res.data && res.data.success) {
-          uni.showToast({
-            title: '删除成功',
-            icon: 'success'
+        if (res.confirm) {
+          const token = uni.getStorageSync('jwtToken');
+          const deleteRes = await uni.request({
+            url: 'https://api.fanovian.cc:3000/api/fitness/delete',
+            method: 'DELETE',
+            header: {
+              Authorization: token ? 'Bearer ' + token : '',
+              'Content-Type': 'application/json'
+            },
+            data: { id: recordId }
           });
           
-          // 刷新数据
-          await this.fetchHeartRateRecords();
-          this.initChart();
-        } else {
-          uni.showToast({
-            title: '删除失败',
-            icon: 'none'
-          });
+          if (deleteRes.data && deleteRes.data.success) {
+            uni.showToast({
+              title: '删除成功',
+              icon: 'success'
+            });
+            await this.fetchHeartRateRecords();
+            this.initChart();
+          } else {
+            throw new Error('删除失败');
+          }
         }
       } catch (error) {
-        console.error('删除健康记录失败:', error);
         uni.showToast({
           title: '删除失败，请重试',
           icon: 'none'
         });
       }
-    },
-    
-    // 处理删除记录事件
-    deleteRecord(recordId) {
-      uni.showModal({
-        title: '确认删除',
-        content: '是否确定删除此条记录？',
-        success: (res) => {
-          if (res.confirm) {
-            this.deleteHealthRecord(recordId);
-          }
-        }
-      });
-    },
-      // 处理修改记录事件
-    modifyRecord(record) {
-      this.modifyingRecord = record;
-      this.modifyForm.value = record.originalValue || record.value.toString();
-      this.modifyForm.note = record.note || '';
-      
-      // 处理时间格式
-      if (record.originalTime) {
-        const dateTime = new Date(record.originalTime);
-        this.modifyForm.dateValue = dateTime.toISOString().slice(0, 10);
-        this.modifyForm.timeValue = dateTime.toTimeString().slice(0, 5);
-        this.modifyForm.time = dateTime.toISOString();
-      }
-      
-      this.showModifyModal = true;
-    },
-    
-    // 修改健康记录API
+    },    // 修改健康记录
     async modifyHealthRecord() {
+      if (!this.modifyForm.value || !this.modifyForm.dateValue || !this.modifyForm.timeValue) {
+        uni.showToast({
+          title: '请填写完整信息',
+          icon: 'none'
+        });
+        return;
+      }
+      // 修正：确保 time 字段拼接并传递给后端
+      this.updateModifyTime();
       try {
         const token = uni.getStorageSync('jwtToken');
         if (!token) {
           uni.showToast({ title: '请先登录', icon: 'none' });
           return;
         }
-          const requestData = {
+        const requestData = {
           record_id: this.modifyingRecord.id,
           type: 'heart_rate',
           value: Number(this.modifyForm.value),
-          note: this.modifyForm.note || undefined
+          note: this.modifyForm.note || undefined,
+          time: this.modifyForm.time // 修正：加上时间字段
         };
-        
         const res = await uni.request({
           url: 'https://api.fanovian.cc:3000/api/fitness/modify',
           method: 'POST',
@@ -275,7 +327,7 @@ export default {
           },
           data: requestData
         });
-        
+
         if (res.data && res.data.success) {
           uni.showToast({
             title: '修改成功',
@@ -288,20 +340,17 @@ export default {
           await this.fetchHeartRateRecords();
           this.initChart();
         } else {
-          uni.showToast({
-            title: res.data?.message || '修改失败',
-            icon: 'none'
-          });
+          throw new Error('修改失败');
         }
       } catch (error) {
-        console.error('修改健康记录失败:', error);
         uni.showToast({
           title: '修改失败，请重试',
           icon: 'none'
         });
       }
     },
-      // 关闭修改模态框
+    
+    // 关闭修改模态框
     closeModifyModal() {
       this.showModifyModal = false;
       this.modifyingRecord = null;
@@ -329,8 +378,7 @@ export default {
     // 更新修改表单时间
     updateModifyTime() {
       if (this.modifyForm.dateValue && this.modifyForm.timeValue) {
-        const timeString = this.modifyForm.dateValue + 'T' + this.modifyForm.timeValue + ':00';
-        this.modifyForm.time = new Date(timeString).toISOString();
+        this.modifyForm.time = this.modifyForm.dateValue + 'T' + this.modifyForm.timeValue + ':00+08:00';
       } else {
         this.modifyForm.time = '';
       }
@@ -357,8 +405,11 @@ export default {
   margin-top: 10rpx;
   font-size: 28rpx;
 }
-.record-list {
+.record-info {
+  display: flex;
+  justify-content: space-between;
   flex: 1;
+  margin-right: 10rpx;
 }
 .record-item {
   display: flex;
@@ -367,10 +418,10 @@ export default {
   border-bottom: 1px solid #eee;
 }
 .positive {
-  color: #e53935;
+  color: #1976d2;
 }
 .negative {
-  color: #1976d2;
+  color: #F44336;
 }
 .chart-x-axis {
   display: flex;
@@ -389,9 +440,6 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-.chart-y-axis text {
-  margin: 5rpx 0;
 }
 
 .record-info {

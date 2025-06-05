@@ -1,4 +1,7 @@
+<!-- user/index.vue -->
+<!-- 用户信息页，展示和编辑用户基本信息、详细资料、密码，支持本地与服务器数据同步。 -->
 <script setup>
+// 页面逻辑：管理用户信息、编辑弹窗、服务器状态，支持资料获取、修改、登出等操作
 import { ref, onMounted } from 'vue'
 
 const userInfo = ref({
@@ -366,10 +369,10 @@ onMounted(async () => {
   await fetchUserProfile()
 })
 </script>
-
 <template>
+  <!-- 用户信息主容器 -->
   <view class="container">
-    <!-- 加载状态 -->
+    <!-- 加载状态指示 -->
     <view v-if="loading" class="loading-container">
       <text class="loading-text">加载中...</text>
     </view>
@@ -506,6 +509,7 @@ onMounted(async () => {
     </view>
     
     <view style="flex:1"></view>
+    <!-- 退出登录按钮 -->
     <button class="logout-btn" @click="logout">退出登录</button>
   </view>
 </template>

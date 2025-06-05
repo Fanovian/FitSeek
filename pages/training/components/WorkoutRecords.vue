@@ -1,3 +1,5 @@
+<!-- WorkoutRecords.vue -->
+<!-- 锻炼历史记录组件，按日期分组展示锻炼记录，支持编辑与删除。 -->
 <script setup>
 import { defineProps, computed } from 'vue';
 import { useTrainingStore } from '../store/training.js';
@@ -24,7 +26,7 @@ const groupedRecords = computed(() => {
   const groups = {};
   
   props.records.forEach(record => {
-    // 提取日期部分（YYYY-MM-DD）
+    // 始终用 'YYYY-MM-DD' 格式
     const date = record.createdAt.split(' ')[0];
     
     if (!groups[date]) {
@@ -39,31 +41,14 @@ const groupedRecords = computed(() => {
   
   // 转换为数组并按日期排序（最新的在前）
   return Object.values(groups).sort((a, b) => {
-    return new Date(b.date) - new Date(a.date);
+    return b.date.localeCompare(a.date); // 字符串比较即可
   });
 });
 
 // 格式化日期显示
 const formatDateDisplay = (dateString) => {
-  const date = new Date(dateString);
-  const today = new Date();
-  const yesterday = new Date();
-  yesterday.setDate(today.getDate() - 1);
-  
-  const dateStr = dateString;
-  const todayStr = today.toISOString().split('T')[0];
-  const yesterdayStr = yesterday.toISOString().split('T')[0];
-  
-  if (dateStr === todayStr) {
-    return '今天';
-  } else if (dateStr === yesterdayStr) {
-    return '昨天';
-  } else {
-    // 格式化为 MM月DD日
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    return `${month}月${day}日`;
-  }
+  // 只返回 'YYYY-MM-DD' 格式
+  return dateString;
 };
 
 // 删除记录
@@ -86,8 +71,9 @@ const editWorkout = (workout) => {
 </script>
 
 <template>
+  <!-- 历史记录列表主区域 -->
   <view>
-    <!-- 历史记录列表 -->
+    <!-- 按天分组的锻炼记录 -->
     <view v-for="day in groupedRecords" :key="day.date" class="day-section">
       <view class="day-header">
         <text class="day-title">{{ formatDateDisplay(day.date) }}</text>
