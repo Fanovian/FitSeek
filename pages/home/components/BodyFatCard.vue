@@ -8,10 +8,6 @@
               {{ item.change }}
             </text>
           </view>
-          <view class="action-buttons">
-            <text class="modify-btn" @click.stop="modifyRecord(item)">修改</text>
-            <text class="delete-btn" @click.stop="deleteRecord(item)">删除</text>
-          </view>
         </view>
       </view>
     </view>
@@ -25,7 +21,6 @@ export default {
       required: true,
     },
   },
-  emits: ['delete'],
   computed: {
     recentRecords() {
       return this.records.slice(0, 3);
@@ -36,11 +31,6 @@ export default {
       uni.navigateTo({
         url: `/pages/home/body_fat_detail?data=${encodeURIComponent(JSON.stringify(this.records))}`,
       });
-    },    deleteRecord(record) {
-      this.$emit('delete', record.id);
-    },
-    modifyRecord(record) {
-      this.$emit('modify', record);
     },
   },
 };

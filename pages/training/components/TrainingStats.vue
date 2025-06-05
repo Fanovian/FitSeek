@@ -15,10 +15,23 @@ const weeklyTrainingMinutes = computed(() => {
   
   return workoutRecords.value
     .filter(record => {
-      const recordDate = new Date(record.createdAt);
-      return recordDate >= weekStart;
+      // 优先使用原始时间进行比较，确保准确性
+      let recordDate;
+      if (record.originalTime) {
+        recordDate = new Date(record.originalTime);
+      } else {
+        // 兼容老数据：从格式化时间中提取日期部分
+        const recordDateString = record.createdAt.split(' ')[0];
+        recordDate = new Date(recordDateString);
+      }
+      
+      // 验证日期有效性并检查是否在本周范围内
+      return !isNaN(recordDate.getTime()) && recordDate >= weekStart;
     })
-    .reduce((sum, record) => sum + parseInt(record.duration || 0), 0);
+    .reduce((sum, record) => {
+      const duration = parseInt(record.duration || 0);
+      return sum + (isNaN(duration) ? 0 : duration);
+    }, 0);
 });
 
 // 设定每周锻炼时长目标（分钟）
