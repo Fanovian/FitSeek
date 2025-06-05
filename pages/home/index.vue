@@ -11,8 +11,8 @@
       </view>
       
       <view class="current-weight">
-        <text class="weight">{{ currentWeight }}</text>
-        <text class="unit">(目标:{{ targetWeight }})</text>
+        <text class="weight">{{ currentWeight }}kg</text>
+        <text class="unit">(目标:{{ targetWeight }}kg)</text>
       </view>
       
       <view class="bmi-info">
@@ -490,7 +490,7 @@ export default {
   white-space: pre-line;
 }
 .value {
-  font-size: 32px;
+  font-size: 22px;
   font-weight: bold;
   font-family: inherit;
   text-align: center;

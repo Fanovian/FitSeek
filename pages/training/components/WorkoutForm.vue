@@ -167,6 +167,22 @@ const cancelForm = () => {
     <view class="form-header">
       <text class="form-title">{{ isEditing ? '修改锻炼记录' : '添加锻炼记录' }}</text>
     </view>
+
+    <view class="form-item">
+      <text class="form-label">锻炼类型</text>
+      <view class="workout-types-container">
+        <view 
+          v-for="type in workoutTypes" 
+          :key="type.value" 
+          class="workout-type-item" 
+          :class="{ 'active': formData.workoutType === type.value }"
+          @click="formData.workoutType = type.value"
+        >
+          <image :src="`/static/icons/training/${type.value}.svg`" class="workout-type-icon"></image>
+          <text class="workout-type-label">{{ type.label }}</text>
+        </view>
+      </view>
+    </view>
     
     <!-- 训练内容输入区 -->
     <view class="form-item">
