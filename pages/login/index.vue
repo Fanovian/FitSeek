@@ -174,6 +174,7 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  padding-top: env(safe-area-inset-top);
 }
 .logo-area {
   display: flex;

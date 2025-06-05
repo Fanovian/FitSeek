@@ -1,6 +1,8 @@
 <!-- AddHealthRecordForm.vue -->
 <template>
   <view class="health-record-form" :class="{ 'form-expanded': isExpanded }">
+    <!-- 遮罩层 -->
+    <view v-if="isExpanded" class="form-mask" @click="toggleForm"></view>
     <!-- Add button -->
     <view class="add-button" @click="toggleForm" :class="{ 'button-active': isExpanded }">
       <view class="button-content">
@@ -202,15 +204,25 @@ export default {
 </script>
 
 <style scoped>
-/* 让按钮居中且悬浮于底部tab栏上方，适配不同屏幕 */
 .health-record-form {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 120rpx; /* 距底部tab栏上方，避免被遮挡，可根据实际tab栏高度调整 */
+  bottom: 120rpx;
   display: flex;
   justify-content: center;
   z-index: 100;
+}
+
+/* 遮罩层样式 */
+.form-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.35);
+  z-index: 110;
 }
 
 .add-button {
@@ -224,6 +236,7 @@ export default {
   align-items: center;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
+  z-index: 120;
 }
 
 .add-button.button-active {
@@ -247,35 +260,45 @@ export default {
   margin-top: 4rpx;
 }
 
+/* 弹窗表单样式，居中显示 */
 .form-container {
-  position: absolute;
-  bottom: 120rpx;
-  left: 0;
-  width: 600rpx;
-  background-color: white;
-  border-radius: 12rpx;
-  padding: 20rpx;
-  box-shadow: 0 2rpx 20rpx rgba(0, 0, 0, 0.15);
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  max-width: 650rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 32rpx 24rpx 24rpx 24rpx;
+  box-shadow: 0 8rpx 32rpx rgba(56,142,60,0.18);
   display: flex;
   flex-direction: column;
   gap: 20rpx;
+  z-index: 120;
+  align-items: center;
+  justify-content: center;
 }
 
 .form-header {
   padding-bottom: 10rpx;
   border-bottom: 1rpx solid #f0f0f0;
+  width: 100%;
+  text-align: center;
 }
 
 .form-title {
   font-size: 32rpx;
   font-weight: bold;
   color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
 }
 
 .record-types {
   display: flex;
   justify-content: space-between;
   padding: 10rpx 0;
+  width: 100%;
 }
 
 .record-type-option {
@@ -303,11 +326,12 @@ export default {
   color: #333;
 }
 
-/* 垂直排列输入项 */
 .input-container-vertical {
   display: flex;
   flex-direction: column;
   gap: 20rpx;
+  width: 100%;
+  align-items: center;
 }
 
 .input-group {
@@ -319,12 +343,18 @@ export default {
   height: 80rpx;
   flex: 1;
   margin-bottom: 0;
+  width: 100%;
+  background: #fafbfa;
 }
 
 .record-input {
   flex: 1;
   height: 100%;
   font-size: 32rpx;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
 }
 
 .input-unit {
@@ -345,6 +375,8 @@ export default {
   padding: 0 30rpx;
   white-space: nowrap;
   flex-shrink: 0;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
 }
 
 .submit-button[disabled] {

@@ -376,9 +376,9 @@ onMounted(async () => {
       <view v-else>
       <!-- 服务器状态指示器 -->
       <view class="server-status" :class="serverStatus">
-        <text v-if="serverStatus === 'online'" class="status-text">🟢 服务器在线</text>
-        <text v-else-if="serverStatus === 'offline'" class="status-text">🔴 服务器离线，使用本地数据</text>
-        <text v-else class="status-text">🟡 检查服务器状态...</text>
+        <text v-if="serverStatus === 'online'" class="status-text">服务器在线</text>
+        <text v-else-if="serverStatus === 'offline'" class="status-text">服务器离线，使用本地数据</text>
+        <text v-else class="status-text">检查服务器状态...</text>
       </view>
       
       <view class="user-info">
@@ -511,6 +511,9 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.page, .container, .main {
+  padding-top: env(safe-area-inset-top);
+}
 .container {
   padding: 40rpx;
   background: #f5fff7;
