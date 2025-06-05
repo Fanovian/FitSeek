@@ -14,6 +14,7 @@ const {
   trainLibrary,
   fetchWorkoutRecords, 
   addWorkoutRecord: storeAddWorkoutRecord,
+  modifyWorkoutRecord,
   deleteWorkoutRecord,
   fetchTrainLibrary,
   getWorkoutTypeIcon 
@@ -21,6 +22,10 @@ const {
 
 // 是否显示添加表单
 const showAddForm = ref(false);
+// 是否显示编辑表单
+const showEditForm = ref(false);
+// 当前编辑的记录
+const editingWorkout = ref(null);
 
 // 添加新的锻炼记录
 const addWorkoutRecord = async (formData) => {
@@ -43,6 +48,42 @@ const addWorkoutRecord = async (formData) => {
     });
     errorReport(error, 'addWorkoutRecord', '/pages/training/index');
   }
+};
+
+// 处理修改锻炼记录
+const handleEditRecord = (workout) => {
+  editingWorkout.value = workout;
+  showEditForm.value = true;
+  showAddForm.value = false; // 确保添加表单关闭
+};
+
+// 修改锻炼记录
+const modifyWorkout = async (formData) => {
+  try {
+    await modifyWorkoutRecord(editingWorkout.value.id, formData);
+    
+    // 关闭编辑表单
+    showEditForm.value = false;
+    editingWorkout.value = null;
+    
+    uni.showToast({
+      title: '修改成功',
+      icon: 'success'
+    });
+  } catch (error) {
+    console.error('修改锻炼记录失败:', error);
+    uni.showToast({
+      title: '修改失败，请重试',
+      icon: 'none'
+    });
+    errorReport(error, 'modifyWorkout', '/pages/training/index');
+  }
+};
+
+// 取消编辑
+const cancelEdit = () => {
+  showEditForm.value = false;
+  editingWorkout.value = null;
 };
 
 // 处理删除锻炼记录
@@ -78,9 +119,8 @@ onMounted(async () => {
   <view class="container">
     <!-- 顶部统计信息 -->
     <training-stats />
-    
-    <!-- 添加记录按钮 -->
-    <view class="add-workout-section" v-if="!showAddForm">
+      <!-- 添加记录按钮 -->
+    <view class="add-workout-section" v-if="!showAddForm && !showEditForm">
       <button class="add-workout-btn" @click="showAddForm = true">+ 添加锻炼记录</button>
     </view>
       <!-- 添加锻炼记录表单 -->
@@ -88,14 +128,27 @@ onMounted(async () => {
       v-if="showAddForm"
       :workout-types="workoutTypes"
       :train-library="trainLibrary"
+      :is-editing="false"
       @submit="addWorkoutRecord"
       @cancel="showAddForm = false"
+    />
+
+    <!-- 修改锻炼记录表单 -->
+    <workout-form 
+      v-if="showEditForm"
+      :workout-types="workoutTypes"
+      :train-library="trainLibrary"
+      :editing-workout="editingWorkout"
+      :is-editing="true"
+      @submit="modifyWorkout"
+      @cancel="cancelEdit"
     />
     
     <!-- 锻炼历史记录 -->
     <workout-records 
       :records="workoutRecords" 
       @delete="handleDeleteRecord"
+      @edit="handleEditRecord"
     />
   </view>
 </template>

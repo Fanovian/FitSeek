@@ -13,47 +13,53 @@ const props = defineProps({
 const trainingStore = useTrainingStore();
 const { getWorkoutTypeIcon } = trainingStore;
 
-const emit = defineEmits(['delete']);
+const emit = defineEmits(['delete', 'edit']);
 
 // 按日期分组记录
 const groupedRecords = computed(() => {
-  const grouped = [];
-  const recordsByDate = {};
+  if (!props.records || props.records.length === 0) {
+    return [];
+  }
   
-  // 按日期分组
+  const groups = {};
+  
   props.records.forEach(record => {
-    const dateOnly = record.createdAt.split(' ')[0];
-    if (!recordsByDate[dateOnly]) {
-      recordsByDate[dateOnly] = [];
+    // 提取日期部分（YYYY-MM-DD）
+    const date = record.createdAt.split(' ')[0];
+    
+    if (!groups[date]) {
+      groups[date] = {
+        date: date,
+        workouts: []
+      };
     }
-    recordsByDate[dateOnly].push(record);
+    
+    groups[date].workouts.push(record);
   });
   
-  // 转换为数组形式
-  Object.keys(recordsByDate).sort().reverse().forEach(date => {
-    grouped.push({
-      date,
-      workouts: recordsByDate[date]
-    });
+  // 转换为数组并按日期排序（最新的在前）
+  return Object.values(groups).sort((a, b) => {
+    return new Date(b.date) - new Date(a.date);
   });
-  
-  return grouped;
 });
 
 // 格式化日期显示
 const formatDateDisplay = (dateString) => {
   const date = new Date(dateString);
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
   
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
+  const dateStr = dateString;
+  const todayStr = today.toISOString().split('T')[0];
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
   
-  if (date.getTime() === today.getTime()) {
+  if (dateStr === todayStr) {
     return '今天';
-  } else if (date.getTime() === yesterday.getTime()) {
+  } else if (dateStr === yesterdayStr) {
     return '昨天';
   } else {
+    // 格式化为 MM月DD日
     const month = date.getMonth() + 1;
     const day = date.getDate();
     return `${month}月${day}日`;
@@ -71,6 +77,11 @@ const deleteWorkout = (id) => {
       }
     }
   });
+};
+
+// 修改记录
+const editWorkout = (workout) => {
+  emit('edit', workout);
 };
 </script>
 
@@ -90,10 +101,12 @@ const deleteWorkout = (id) => {
           </view>
           <text class="workout-name">{{ workout.content }}</text>
           <text class="workout-time">{{ workout.createdAt.split(' ')[1] }}</text>
-        </view>
-        <view class="workout-details">
+        </view>        <view class="workout-details">
           <text class="workout-duration">{{ workout.duration }} 分钟</text>
-          <text class="delete-btn" @click="deleteWorkout(workout.id)">删除</text>
+          <view class="action-buttons">
+            <text class="edit-btn" @click="editWorkout(workout)">修改</text>
+            <text class="delete-btn" @click="deleteWorkout(workout.id)">删除</text>
+          </view>
         </view>
       </view>
       
@@ -209,10 +222,30 @@ const deleteWorkout = (id) => {
   font-weight: bold;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 10rpx;
+  margin-top: 10rpx;
+}
+
+.edit-btn {
+  font-size: 24rpx;
+  color: #1890ff;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  border: 1px solid #1890ff;
+  background-color: rgba(24, 144, 255, 0.05);
+  transition: all 0.3s;
+}
+
+.edit-btn:active {
+  background-color: rgba(24, 144, 255, 0.1);
+  color: #0050b3;
+}
+
 .delete-btn {
   font-size: 24rpx;
   color: #ff4d4f;
-  margin-top: 10rpx;
   padding: 4rpx 12rpx;
   border-radius: 20rpx;
   border: 1px solid #ff4d4f;
