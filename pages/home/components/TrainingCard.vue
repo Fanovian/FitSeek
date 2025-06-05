@@ -1,10 +1,15 @@
 <!-- components/TrainingCard.vue -->
+<!-- 锻炼卡片组件，展示最近三条锻炼记录，点击可进入详情页。 -->
 <template>
+    <!-- 锻炼卡片主容器 -->
     <view class="card training-card" @click="navigateToDetail">
+      <!-- 卡片标题 -->
       <view class="card-title">锻炼记录</view>
+      <!-- 最近三条锻炼记录列表 -->
       <view class="card-content">
         <view v-for="(item, index) in recentRecords" :key="index" class="record-line">
-          <text>{{ item.date }} - {{ item.duration }}</text>
+          <!-- 单条锻炼记录，含类型、时长、变化 -->
+          <text>{{ getDate(item.time) }} - {{ item.duration }}</text>
           <text :class="{ positive: item.change.startsWith('+'), negative: item.change.startsWith('-') }">
             {{ item.change }}
           </text>
@@ -13,8 +18,8 @@
       </view>
     </view>
   </template>
-  
   <script>
+  // 锻炼卡片逻辑：props 传入 records，computed 取最近三条，methods 提供跳转和时间格式化，typeMap 显示类型中文
 export default {
   props: {
     records: {
@@ -30,16 +35,28 @@ export default {
       return {
         aerobic: '有氧',
         anaerobic: '无氧',
-        streching: '拉伸',
+        stretching: '拉伸',
         other: '其他'
       };
-    },
+    }
   },
   methods: {
     navigateToDetail() {
       uni.navigateTo({
         url: `/pages/home/training_detail?data=${encodeURIComponent(JSON.stringify(this.records))}`,
       });
+    },
+    getDate(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      const beijing = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+      return beijing.toISOString().slice(0, 10);
+    },
+    getTime(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      const beijing = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+      return beijing.toISOString().slice(11, 16);
     },
   },
 };

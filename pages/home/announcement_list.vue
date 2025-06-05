@@ -1,13 +1,19 @@
+<!-- announcement_list.vue -->
+<!-- 公告列表页，展示所有公告摘要，点击可进入详情。 -->
 <template>
+  <!-- 公告列表主容器 -->
   <view class="container">
+    <!-- 公告列表项，显示标题和日期 -->
     <view v-for="item in announcementList" :key="item._id" class="list-item" @click="goDetail(item)">
       <text class="title">{{ getTitle(item.content) }}</text>
-      <text class="date">{{ item.publish_time.slice(0,10) }}</text>
+      <text class="date">{{ getDate(item.publish_time) }}</text>
     </view>
+    <!-- 无公告时的提示 -->
     <view v-if="!announcementList.length" class="list-item"><text>暂无公告</text></view>
   </view>
 </template>
 <script>
+// 页面逻辑：onLoad 拉取公告数据，若不足补本地示例，methods 提供跳转、标题/日期格式化
 import errorReport from '@/utils/errorReport.js';
 export default {
   data() { return { announcementList: [] } },
@@ -66,6 +72,11 @@ export default {
         errorReport(err, 'getTitle in announcement_list.vue', '/pages/home/announcement_list');
         return '';
       }
+    },
+    getDate(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      return date.toLocaleDateString();
     }
   }
 }

@@ -1,6 +1,9 @@
-<!-- pages/weight-detail/index.vue -->
+<!-- pages/body-fat-detail/index.vue -->
+<!-- 体重详情页，展示体重变化趋势图、详细记录列表，并支持记录的修改与删除。 -->
 <template>
+  <!-- 体重详情主容器 -->
   <view class="detail-container">
+    <!-- 趋势图表区域 -->
     <view class="chart-container">
       <text>体重变化趋势图表</text>
       <qiun-data-charts
@@ -13,86 +16,70 @@
         :height="svgHeight"
       />
       <view class="trend">
-        <text v-if="trend > 0" class="positive">总体趋势：+{{ trend }}kg</text>
-        <text v-else-if="trend < 0" class="negative">总体趋势：{{ trend }}kg</text>
+        <text v-if="trend > 0" class="positive">总体趋势：+{{ trend }}%</text>
+        <text v-else-if="trend < 0" class="negative">总体趋势：{{ trend }}%</text>
         <text v-else>总体趋势：无变化</text>
       </view>
-      <view class="chart-x-axis">
-        <text v-for="(cat, idx) in chartData.categories" :key="idx" class="x-label">{{ cat }}</text>
-      </view>
-      <view class="chart-y-axis"><!-- 删除纵坐标标识 --></view>
-    </view>    <view class="record-list">
+      <!-- 不再显示纵坐标标识view -->
+    </view>    <!-- 记录列表区域 -->
+    <view class="record-list">
+      <!-- 单条体重记录，含时间、数值、操作按钮 -->
       <view v-for="(item, index) in detailedRecords" :key="index" class="record-item">
         <view class="record-info">
-          <text>{{ item.date }} - {{ item.value }}kg</text>
-          <text :class="{ positive: item.change.startsWith('+'), negative: item.change.startsWith('-') }">
-            {{ item.change }}
-          </text>
+          <!-- 修正：显示北京时间日期和时间 -->
+          <text>{{ getBeijingDate(item.time || item.originalTime || item.date) + " " + getBeijingTime(item.time || item.originalTime || item.date) }}</text>
+          <text>{{ item.value || item.duration }}</text>
         </view>
-        <view class="action-buttons">
-          <text class="modify-btn" @click="modifyRecord(item)">修改</text>
-          <text class="delete-btn" @click="deleteRecord(item.id)">删除</text>      </view>
-    </view>
-    
-    <!-- 修改记录模态框 -->
-    <view v-if="showModifyModal" class="modify-modal-mask" @click="closeModifyModal">
-      <view class="modify-modal" @click.stop>
-        <view class="modal-header">
-          <text class="modal-title">修改体重记录</text>
-          <text class="modal-close" @click="closeModifyModal">×</text>
+        <view class="action-buttons" style="z-index:1;">
+          <button class="modify-btn" @click="modifyRecord(item)">修改</button>
+          <button class="delete-btn" @click="deleteRecord(item.id)">删除</button>
         </view>
-        
-        <view class="modal-content">
-          <view class="input-group">
-            <text class="input-label">体重(kg)</text>
-            <input 
-              type="digit" 
-              v-model="modifyForm.value" 
-              class="modal-input" 
-              placeholder="输入体重" 
-            />
+      </view>
+      <!-- 修改记录模态框 -->
+      <view v-if="showModifyModal" class="modify-modal-mask" @click="closeModifyModal" style="z-index:1000;">
+        <view class="modify-modal" @click.stop>
+          <view class="modal-header">
+            <text class="modal-title">修改记录</text>
+            <text class="modal-close" @click="closeModifyModal">×</text>
           </view>
-          
-          <view class="input-group">
-            <text class="input-label">日期</text>
-            <picker mode="date" :value="modifyForm.dateValue" @change="onModifyDateChange">
-              <view class="picker-display">
-                {{ modifyForm.dateValue || '选择日期' }}
-              </view>
-            </picker>
+          <view class="modal-content">
+            <!-- 时间选择器放在最上面 -->
+            <view class="input-group">
+              <text class="input-label">日期</text>
+              <picker mode="date" :value="modifyForm.dateValue" @change="onModifyDateChange">
+                <view class="picker-display">
+                  {{ modifyForm.dateValue || '选择日期' }}
+                </view>
+              </picker>
+            </view>
+            <view class="input-group">
+              <text class="input-label">时间</text>
+              <picker mode="time" :value="modifyForm.timeValue" @change="onModifyTimeChange">
+                <view class="picker-display">
+                  {{ modifyForm.timeValue || '选择时间' }}
+                </view>
+              </picker>
+            </view>
+            <view class="input-group">
+              <text class="input-label">数值</text>
+              <input type="digit" v-model="modifyForm.value" class="modal-input" placeholder="输入数值" />
+            </view>
+            <view class="input-group">
+              <text class="input-label">备注</text>
+              <input type="text" v-model="modifyForm.note" class="modal-input" placeholder="备注（可选）" />
+            </view>
           </view>
-          
-          <view class="input-group">
-            <text class="input-label">时间</text>
-            <picker mode="time" :value="modifyForm.timeValue" @change="onModifyTimeChange">
-              <view class="picker-display">
-                {{ modifyForm.timeValue || '选择时间' }}
-              </view>
-            </picker>
+          <view class="modal-footer">
+            <button class="modal-btn cancel-btn" @click="closeModifyModal">取消</button>
+            <button class="modal-btn confirm-btn" @click="modifyHealthRecord">确认</button>
           </view>
-          
-          <view class="input-group">
-            <text class="input-label">备注</text>
-            <input 
-              type="text" 
-              v-model="modifyForm.note" 
-              class="modal-input" 
-              placeholder="备注（可选）" 
-            />
-          </view>
-        </view>
-        
-        <view class="modal-footer">
-          <button class="modal-btn cancel-btn" @click="closeModifyModal">取消</button>
-          <button class="modal-btn confirm-btn" @click="modifyHealthRecord">确认</button>
         </view>
       </view>
     </view>
   </view>
-  </view>
 </template>
-
 <script>
+// 页面逻辑：支持通过参数或接口获取体重记录，渲染趋势图，支持记录的增删改，含表单与弹窗交互
 import QiunDataCharts from '@/uni_modules/qiun-data-charts/components/qiun-data-charts/qiun-data-charts.vue';
 import errorReport from '@/utils/errorReport.js';
 export default {
@@ -124,11 +111,53 @@ export default {
     }
   },
   async created() {
-    await this.fetchWeightRecords();
-    await this.$nextTick();
-    this.initChart();
+    // 兼容通过页面参数 data 传递的 records
+    let records = [];
+    if (this.$route && this.$route.query && this.$route.query.data) {
+      try {
+        records = JSON.parse(decodeURIComponent(this.$route.query.data));
+      } catch (e) {
+        records = [];
+      }
+    } else if (this.$mp && this.$mp.query && this.$mp.query.data) {
+      try {
+        records = JSON.parse(decodeURIComponent(this.$mp.query.data));
+      } catch (e) {
+        records = [];
+      }
+    } else if (typeof getCurrentPages === 'function') {
+      const pages = getCurrentPages();
+      const current = pages[pages.length - 1];
+      if (current && current.options && current.options.data) {
+        try {
+          records = JSON.parse(decodeURIComponent(current.options.data));
+        } catch (e) {
+          records = [];
+        }
+      }
+    }
+    if (records && records.length) {
+      this.detailedRecords = records;
+      this.initChart();
+    } else {
+      await this.fetchWeightRecords();
+      await this.$nextTick();
+      this.initChart();
+    }
   },
   methods: {
+    getBeijingDate(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      const beijing = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+      return beijing.toISOString().slice(0, 10);
+    },
+    getBeijingTime(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      const beijing = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+      return beijing.toISOString().slice(11, 16);
+    },
     async fetchWeightRecords() {
       try {
         const token = uni.getStorageSync('jwtToken');
@@ -146,7 +175,7 @@ export default {
               let change = '';
               if (i < arr.length - 1) {
                 const diff = (r.value - arr[i + 1].value).toFixed(1);
-                change = (diff > 0 ? '+' : '') + diff + 'kg';
+                change = (diff > 0 ? '+' : '') + diff + '%';
               } else {
                 change = '--';
               }              return {
@@ -169,16 +198,17 @@ export default {
       }
     },
     initChart() {
-      // 横轴仅显示日期，纵轴为体重
-      const categories = this.detailedRecords.map(item => {
-        if (item.date) {
-          return item.date.length === 10 ? item.date.slice(5) : item.date;
-        }
-        return '';
+      // 横坐标（categories）按时间升序排列
+      const sortedRecords = [...this.detailedRecords].sort((a, b) => {
+        const dateA = new Date(a.date || a.time);
+        const dateB = new Date(b.date || b.time);
+        return dateA - dateB;
       });
-      const data = this.detailedRecords.map(item => parseFloat(item.value) || 0);      this.chartData = {
+      const categories = sortedRecords.map(item => item.date && item.date.length === 10 ? item.date.slice(5) : (item.date || ''));
+      const data = sortedRecords.map(item => parseFloat(item.value || 0));
+      this.chartData = {
         categories,
-        series: [{ name: '体重', data }]
+        series: [{ name: '体重率', data }]
       };
     },
     
@@ -237,39 +267,45 @@ export default {
       // 处理修改记录事件
     modifyRecord(record) {
       this.modifyingRecord = record;
-      this.modifyForm.value = record.originalValue || record.value.toString().replace(/[^\d.]/g, '');
-      this.modifyForm.note = record.note || '';
-      
-      // 处理时间格式
-      if (record.originalTime) {
-        const dateTime = new Date(record.originalTime);
-        this.modifyForm.dateValue = dateTime.toISOString().slice(0, 10);
-        this.modifyForm.timeValue = dateTime.toTimeString().slice(0, 5);
-        this.modifyForm.time = dateTime.toISOString();
-      } else if (record.date) {
-        this.modifyForm.dateValue = record.date;
-        this.modifyForm.timeValue = '12:00';
-        this.modifyForm.time = new Date(record.date + 'T12:00:00').toISOString();
+      // 修正：兼容 originalTime 和 date 字段，保证时间赋值正确
+      const timeStr = record.originalTime || record.date || '';
+      let dateValue = '', timeValue = '';
+      if (timeStr) {
+        const dateObj = new Date(timeStr);
+        dateValue = dateObj.toISOString().slice(0, 10);
+        timeValue = dateObj.toTimeString().slice(0, 5);
       }
-      
+      this.modifyForm = {
+        value: record.originalValue || record.value.toString().replace(/[^\d.]/g, ''),
+        time: timeStr,
+        note: record.note || '',
+        dateValue,
+        timeValue
+      };
       this.showModifyModal = true;
     },
-    
+
     // 修改健康记录API
     async modifyHealthRecord() {
+      // 修正：确保 time 字段拼接并传递给后端
+      if (!this.modifyForm.value || !this.modifyForm.dateValue || !this.modifyForm.timeValue) {
+        uni.showToast({ title: '请填写完整信息', icon: 'none' });
+        return;
+      }
+      this.updateModifyTime();
       try {
         const token = uni.getStorageSync('jwtToken');
         if (!token) {
           uni.showToast({ title: '请先登录', icon: 'none' });
           return;
         }
-          const requestData = {
+        const requestData = {
           record_id: this.modifyingRecord.id,
           type: 'weight',
           value: Number(this.modifyForm.value),
-          note: this.modifyForm.note || undefined
+          note: this.modifyForm.note || undefined,
+          time: this.modifyForm.time // 修正：加上时间字段
         };
-        
         const res = await uni.request({
           url: 'https://api.fanovian.cc:3000/api/fitness/modify',
           method: 'POST',
@@ -333,8 +369,7 @@ export default {
     // 更新修改表单时间
     updateModifyTime() {
       if (this.modifyForm.dateValue && this.modifyForm.timeValue) {
-        const timeString = this.modifyForm.dateValue + 'T' + this.modifyForm.timeValue + ':00';
-        this.modifyForm.time = new Date(timeString).toISOString();
+        this.modifyForm.time = this.modifyForm.dateValue + 'T' + this.modifyForm.timeValue + ':00+08:00';
       } else {
         this.modifyForm.time = '';
       }
@@ -342,7 +377,7 @@ export default {
   }
 };
 </script>
-  
+
 <style scoped>
 .detail-container {
   padding: 16rpx;
@@ -360,25 +395,6 @@ export default {
 .trend {
   margin-top: 10rpx;
   font-size: 28rpx;
-}
-.chart-x-axis {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  padding-top: 10rpx;
-}
-.x-label {
-  font-size: 24rpx;
-  color: #666;
-}
-.chart-y-axis {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 .record-list {
   flex: 1;
@@ -534,5 +550,14 @@ export default {
 }
 .negative {
   color: #F44336;
+}
+.chart-x-axis {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 10rpx;
+}
+.x-label {
+  font-size: 24rpx;
 }
 </style>

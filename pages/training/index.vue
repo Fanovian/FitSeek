@@ -1,4 +1,7 @@
+<!-- index.vue -->
+<!-- 训练记录主页面，汇总展示训练统计、添加/编辑表单、历史记录，支持增删改查。 -->
 <script setup>
+// 页面逻辑：引入状态管理、表单、历史、统计组件，管理表单显示、数据操作、生命周期加载
 import { ref, onMounted } from 'vue';
 import { useTrainingStore } from './store/training.js';
 import WorkoutForm from './components/WorkoutForm.vue';
@@ -114,16 +117,16 @@ onMounted(async () => {
   }
 });
 </script>
-
 <template>
+  <!-- 训练记录主容器 -->
   <view class="container">
     <!-- 顶部统计信息 -->
     <training-stats />
-      <!-- 添加记录按钮 -->
+      <!-- 添加训练记录按钮 -->
     <view class="add-workout-section" v-if="!showAddForm && !showEditForm">
       <button class="add-workout-btn" @click="showAddForm = true">+ 添加锻炼记录</button>
     </view>
-      <!-- 添加锻炼记录表单 -->
+      <!-- 添加训练记录表单 -->
     <workout-form 
       v-if="showAddForm"
       :workout-types="workoutTypes"
@@ -133,7 +136,7 @@ onMounted(async () => {
       @cancel="showAddForm = false"
     />
 
-    <!-- 修改锻炼记录表单 -->
+    <!-- 修改训练记录表单 -->
     <workout-form 
       v-if="showEditForm"
       :workout-types="workoutTypes"
@@ -144,7 +147,7 @@ onMounted(async () => {
       @cancel="cancelEdit"
     />
     
-    <!-- 锻炼历史记录 -->
+    <!-- 训练历史记录 -->
     <workout-records 
       :records="workoutRecords" 
       @delete="handleDeleteRecord"

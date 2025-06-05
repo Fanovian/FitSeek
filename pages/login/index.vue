@@ -1,11 +1,18 @@
+<!-- 登录页 index.vue -->
+<!-- 本页面用于用户登录与注册，支持手机号/用户名登录，切换注册与登录模式。 -->
 <template>
+  <!-- 登录页面主背景 -->
   <view class="login-bg">
+    <!-- Logo区域 -->
     <view class="logo-area">
       <image src="/static/logo.png" class="logo-img" mode="aspectFit"></image>
       <text class="logo-title">FitSeek</text>
     </view>
+    <!-- 登录/注册表单容器 -->
     <view class="form-container">
+      <!-- 表单标题 -->
       <h2 class="form-title">{{ isRegister ? '注册' : '登录' }}</h2>
+      <!-- 注册表单区域 -->
       <view v-if="isRegister">
         <view class="form-group">
           <label>手机号</label>
@@ -20,6 +27,7 @@
           <input v-model="registerPassword" type="password" placeholder="请输入密码" maxlength="20" />
         </view>
       </view>
+      <!-- 登录表单区域 -->
       <view v-else>
         <view class="form-group">
           <label>登录方式</label>
@@ -38,10 +46,13 @@
           <input v-model="password" type="password" placeholder="请输入密码" maxlength="20" />
         </view>
       </view>
+      <!-- 登录/注册按钮 -->
       <button @click="isRegister ? handleRegister() : handleLogin()" class="login-btn">
         {{ isRegister ? '注册' : '登录' }}
       </button>
+      <!-- 错误提示信息 -->
       <text class="error-message">{{ errorMessage }}</text>
+      <!-- 切换注册/登录链接 -->
       <view class="switch-link">
         <text @click="isRegister = !isRegister">
           {{ isRegister ? '已有账号？去登录' : '没有账号？去注册' }}

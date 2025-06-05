@@ -1,9 +1,16 @@
 <!-- components/BodyFatCard.vue -->
+<!-- 体脂卡片组件，展示最近三条体脂记录，点击可进入详情页。 -->
 <template>
+    <!-- 体脂卡片主容器 -->
     <view class="card body-fat-card" @click="navigateToDetail">
-      <view class="card-title">体脂记录</view>      <view class="card-content">        <view v-for="(item, index) in recentRecords" :key="index" class="record-line">
+      <!-- 卡片标题 -->
+      <view class="card-title">体脂记录</view>
+      <!-- 最近三条体脂记录列表 -->
+      <view class="card-content">
+        <view v-for="(item, index) in recentRecords" :key="index" class="record-line">
+          <!-- 体脂记录行 -->
           <view class="record-info">
-            <text>{{ item.date }} - {{ item.value }}</text>
+            <text>{{ getDate(item.time) + " " + getTime(item.time) }} - {{ item.value }}</text>
             <text :class="{ positive: item.change.startsWith('+'), negative: item.change.startsWith('-') }">
               {{ item.change }}
             </text>
@@ -12,7 +19,7 @@
       </view>
     </view>
   </template>
-  
+  <!-- 体脂卡片逻辑：props 传入 records，computed 取最近三条，methods 提供跳转和时间格式化 -->
   <script>
 export default {
   props: {
@@ -31,6 +38,18 @@ export default {
       uni.navigateTo({
         url: `/pages/home/body_fat_detail?data=${encodeURIComponent(JSON.stringify(this.records))}`,
       });
+    },
+    getDate(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      const beijing = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+      return beijing.toISOString().slice(0, 10);
+    },
+    getTime(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      const beijing = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+      return beijing.toISOString().slice(11, 16);
     },
   },
 };

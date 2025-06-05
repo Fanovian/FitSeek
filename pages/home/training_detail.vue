@@ -1,6 +1,9 @@
 <!-- pages/training-detail/index.vue -->
+<!-- 锻炼详情页，展示锻炼时长变化趋势图、详细记录列表。 -->
 <template>
+  <!-- 锻炼详情主容器 -->
   <view class="detail-container">
+    <!-- 趋势图表区域 -->
     <view class="chart-container">
       <text>锻炼时长变化趋势图表</text>
       <qiun-data-charts
@@ -12,26 +15,31 @@
         :width="screenWidth"
         :height="svgHeight"
       />
+      <!-- 趋势描述 -->
       <view class="trend">
         <text v-if="trend > 0" class="positive">总体趋势：+{{ trend }}分钟</text>
         <text v-else-if="trend < 0" class="negative">总体趋势：{{ trend }}分钟</text>
         <text v-else>总体趋势：无变化</text>
       </view>
+      <!-- 横坐标标签 -->
       <view class="chart-x-axis">
         <text v-for="(cat, idx) in chartData.categories" :key="idx" class="x-label">{{ cat }}</text>
       </view>
+      <!-- 纵坐标标签（已隐藏） -->
       <view class="chart-y-axis"><!-- 删除纵坐标标识 --></view>
     </view>
+    <!-- 记录列表区域 -->
     <view class="record-list">
       <view v-for="(item, index) in detailedRecords" :key="index" class="record-item">
+        <!-- 单条锻炼记录，含时间、时长、类型 -->
         <text>{{ item.date }} - {{ item.duration }}分钟</text>
         <text class="type-label">{{ typeMap[item.type] || '综合训练' }}</text>
       </view>
     </view>
   </view>
 </template>
-
 <script>
+// 页面逻辑：获取锻炼记录，渲染趋势图，展示类型映射，支持数据初始化
 import QiunDataCharts from '@/uni_modules/qiun-data-charts/components/qiun-data-charts/qiun-data-charts.vue';
 import errorReport from '@/utils/errorReport.js';
 export default {
@@ -57,7 +65,7 @@ export default {
       return {
         aerobic: '有氧',
         anaerobic: '无氧',
-        streching: '拉伸',
+        stretching: '拉伸',
         other: '其他'
       };
     }
@@ -82,12 +90,26 @@ export default {
       }
     },
     initChart() {
-      const categories = this.detailedRecords.map(item => item.date && item.date.length === 10 ? item.date.slice(5) : item.date || '');
-      const data = this.detailedRecords.map(item => parseInt(item.duration) || 0);
+      // 横坐标（categories）按时间升序排列
+      const sortedRecords = [...this.detailedRecords].sort((a, b) => {
+        const dateA = new Date(a.date || a.time);
+        const dateB = new Date(b.date || b.time);
+        return dateA - dateB;
+      });
+      const categories = sortedRecords.map(item => item.date && item.date.length === 10 ? item.date.slice(5) : (item.date || ''));
+      const data = sortedRecords.map(item => parseInt(item.duration) || 0);
       this.chartData = {
         categories,
         series: [{ name: '锻炼时长', data }]
       };
+    },
+    // 更新修改表单时间
+    updateModifyTime() {
+      if (this.modifyForm.dateValue && this.modifyForm.timeValue) {
+        this.modifyForm.time = this.modifyForm.dateValue + 'T' + this.modifyForm.timeValue + ':00+08:00';
+      } else {
+        this.modifyForm.time = '';
+      }
     }
   }
 };

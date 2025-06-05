@@ -1,3 +1,5 @@
+// WorkoutTypeIcon.vue
+// 锻炼类型图标组件，根据类型显示不同图标。
 <script setup>
 defineProps({
   type: {
@@ -6,6 +8,7 @@ defineProps({
   }
 });
 
+// 组件逻辑：props 传入类型，getIconClass 返回对应图标类名
 // 获取锻炼类型对应的图标
 const getIconClass = (type) => {
   switch (type) {
@@ -20,8 +23,8 @@ const getIconClass = (type) => {
   }
 };
 </script>
-
 <template>
+  <!-- 图标展示区域 -->
   <view :class="['workout-type-icon', getIconClass(type)]"></view>
 </template>
 

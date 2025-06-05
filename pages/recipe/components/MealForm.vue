@@ -1,4 +1,7 @@
+<!-- MealForm.vue -->
+<!-- 饮食记录表单组件，支持添加/编辑饮食类型、食物、热量，含下拉选择与表单校验。 -->
 <script setup>
+// 组件逻辑：props 传入类型/库/编辑项，emit 事件，含表单数据、校验、下拉、提交/取消等
 import { ref, defineProps, defineEmits, computed, watch } from 'vue';
 
 const props = defineProps({
@@ -171,25 +174,31 @@ const cancelForm = () => {
   emit('cancel');
 };
 </script>
-
-<template>  <view class="form-section">
+<template>
+  <!-- 饮食表单主区域 -->
+  <view class="form-section">
+    <!-- 表单头部 -->
     <view class="form-header">
       <text class="form-title">{{ isEditing ? '修改饮食记录' : '添加饮食记录' }}</text>
-    </view><view class="form-item">
-        <text class="form-label">类型</text>
-        <view class="meal-types-container">
-          <view 
-            v-for="type in mealTypes" 
-            :key="type.value" 
-            class="meal-type-item" 
-            :class="{ 'active': newMeal.type === type.value }"
-            @click="newMeal.type = type.value"
-          >
-            <image :src="type.icon" class="meal-type-icon"></image>
-            <text class="meal-type-label">{{ type.label }}</text>
-          </view>
+    </view>
+    <!-- 类型选择区 -->
+    <view class="form-item">
+      <text class="form-label">类型</text>
+      <view class="meal-types-container">
+        <view 
+          v-for="type in mealTypes" 
+          :key="type.value" 
+          class="meal-type-item" 
+          :class="{ 'active': newMeal.type === type.value }"
+          @click="newMeal.type = type.value"
+        >
+          <image :src="type.icon" class="meal-type-icon"></image>
+          <text class="meal-type-label">{{ type.label }}</text>
         </view>
-      </view>    <view class="form-item">
+      </view>
+    </view>
+    <!-- 食物名称输入及下拉菜单 -->
+    <view class="form-item">
       <text class="form-label">食物名称</text>
       
       <view class="food-input-container">
@@ -226,12 +235,14 @@ const cancelForm = () => {
       <text v-if="formErrors.name" class="error-text">{{ formErrors.name }}</text>
     </view>
     
+    <!-- 热量输入及错误提示 -->
     <view class="form-item">
       <text class="form-label">热量 (kcal)</text>
       <input type="number" v-model="newMeal.calories" placeholder="请输入食物热量" class="form-input" />
       <text v-if="formErrors.calories" class="error-text">{{ formErrors.calories }}</text>
     </view>
-      <view class="form-actions">
+    <!-- 表单操作按钮 -->
+    <view class="form-actions">
       <button class="cancel-btn" @click="cancelForm">取消</button>
       <button class="submit-btn" @click="submitForm">{{ isEditing ? '更新' : '保存' }}</button>
     </view>

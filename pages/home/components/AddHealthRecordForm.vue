@@ -1,9 +1,11 @@
 <!-- AddHealthRecordForm.vue -->
+<!-- 本组件用于添加健康记录，支持多种类型（体重、体脂、心率等），点击加号展开表单，选择类型并输入数值后提交。 -->
 <template>
+  <!-- 健康记录表单主容器，isExpanded 控制展开/收起 -->
   <view class="health-record-form" :class="{ 'form-expanded': isExpanded }">
-    <!-- 遮罩层 -->
+    <!-- 遮罩层，点击可关闭表单 -->
     <view v-if="isExpanded" class="form-mask" @click="toggleForm"></view>
-    <!-- Add button -->
+    <!-- Add button，点击展开/收起表单 -->
     <view class="add-button" @click="toggleForm" :class="{ 'button-active': isExpanded }">
       <view class="button-content">
         <text class="add-icon">{{ isExpanded ? '×' : '+' }}</text>
@@ -11,13 +13,14 @@
       </view>
     </view>
     
-    <!-- Expandable form -->
+    <!-- Expandable form，展开时显示表单内容 -->
     <view class="form-container" v-if="isExpanded">
       <view class="form-header">
         <text class="form-title">添加健康记录</text>
       </view>
       
       <view class="record-types">
+        <!-- 记录类型选择区，支持多种健康数据类型 -->
         <view 
           v-for="option in recordTypes" 
           :key="option.type" 
@@ -31,7 +34,7 @@
       </view>
       
       <view class="input-container-vertical">
-        <!-- 记录数据 -->
+        <!-- 记录数据输入区，输入对应类型的数值 -->
         <view class="input-group">
           <input 
             type="digit" 
@@ -129,11 +132,11 @@ export default {
     onTimeChange(e) {
       this.timeValue = e.detail.value;
       this.updateRecordTime();
-    },    updateRecordTime() {
+    },
+    updateRecordTime() {
       if (this.dateValue && this.timeValue) {
-        // 构造完整的时间字符串并转换为ISO 8601格式
-        const timeString = this.dateValue + 'T' + this.timeValue + ':00';
-        this.recordTime = new Date(timeString).toISOString();
+        // 提交时直接用本地时间，不拼接+08:00
+        this.recordTime = this.dateValue + 'T' + this.timeValue + ':00';
       } else {
         this.recordTime = '';
       }

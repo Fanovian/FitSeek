@@ -1,4 +1,7 @@
+<!-- MealStats.vue -->
+<!-- 饮食统计组件，展示今日热量摄入、目标及进度，支持目标设置。 -->
 <script setup>
+// 组件逻辑：props 传入目标与今日摄入，emit 支持目标更新，含进度计算与弹窗设置
 import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
@@ -45,13 +48,16 @@ const caloriePercentage = () => {
 </script>
 
 <template>
+  <!-- 饮食统计主容器 -->
   <view class="stats-container">
     <view class="header">
+      <!-- 标题与目标设置按钮 -->
       <view class="title-container">
         <view class="title-icon"></view>
         <view class="title">饮食记录</view>
         <button class="goal-button" @click="updateTarget">设置目标</button>
       </view>
+      <!-- 热量信息展示区 -->
       <view class="calories-info">
         <view class="info-item">
           <text class="info-label">热量目标</text>

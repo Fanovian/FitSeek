@@ -1,4 +1,7 @@
+<!-- index.vue -->
+<!-- 饮食记录主页面，汇总展示饮食统计、添加/编辑表单、历史记录，支持增删改查。 -->
 <script setup>
+// 页面逻辑：引入状态管理、表单、历史、统计组件，管理表单显示、数据操作、生命周期加载
 import { ref, onMounted } from 'vue';
 import { useRecipeStore } from './store/recipe.js';
 import MealForm from './components/MealForm.vue';
@@ -135,8 +138,8 @@ onMounted(async () => {
   }
 });
 </script>
-
 <template>
+  <!-- 饮食记录主容器 -->
   <view class="container">
     <!-- 顶部统计信息 -->
     <meal-stats 

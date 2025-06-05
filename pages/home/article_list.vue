@@ -1,13 +1,19 @@
+<!-- article_list.vue -->
+<!-- 文章列表页，展示所有文章摘要，点击可进入详情。 -->
 <template>
+  <!-- 文章列表主容器 -->
   <view class="container">
+    <!-- 文章列表项，显示标题和日期 -->
     <view v-for="item in articleList" :key="item._id" class="list-item" @click="goDetail(item)">
       <text class="title">{{ getTitle(item.content) }}</text>
-      <text class="date">{{ item.publish_time.slice(0,10) }}</text>
+      <text class="date">{{ getDate(item.publish_time) }}</text>
     </view>
+    <!-- 无文章时的提示 -->
     <view v-if="!articleList.length" class="list-item"><text>暂无文章</text></view>
   </view>
 </template>
 <script>
+// 页面逻辑：onLoad 拉取文章数据，若不足补本地示例，methods 提供跳转、标题/日期格式化
 import errorReport from '@/utils/errorReport.js';
 export default {
   data() { return { articleList: [] } },
@@ -66,6 +72,11 @@ export default {
         errorReport(err, 'getTitle in article_list.vue', '/pages/home/article_list');
         return '';
       }
+    },
+    getDate(isoString) {
+      if (!isoString) return '';
+      const date = new Date(isoString);
+      return date.toLocaleDateString();
     }
   }
 }
