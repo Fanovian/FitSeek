@@ -1,10 +1,14 @@
 <script setup>
-import { ref, defineProps, defineEmits } from 'vue';
+import { ref, defineProps, defineEmits, computed } from 'vue';
 
 const props = defineProps({
   workoutTypes: {
     type: Array,
     required: true
+  },
+  trainLibrary: {
+    type: Array,
+    default: () => []
   }
 });
 
@@ -15,6 +19,19 @@ const formData = ref({
   workoutType: 'cardio',
   content: '',
   duration: '',
+});
+
+// 控制下拉菜单显示
+const showDropdown = ref(false);
+
+// 过滤后的训练库（根据输入内容筛选）
+const filteredTrainLibrary = computed(() => {
+  if (!formData.value.content.trim()) {
+    return props.trainLibrary;
+  }
+  return props.trainLibrary.filter(train => 
+    train.name.toLowerCase().includes(formData.value.content.toLowerCase())
+  );
 });
 
 // 表单验证
@@ -45,6 +62,43 @@ const validateForm = () => {
   return isValid;
 };
 
+// 选择预设训练
+const selectTrain = (train) => {
+  formData.value.content = train.name;
+  showDropdown.value = false;
+};
+
+// 获取训练分类的中文名称
+const getTrainCategoryName = (category) => {
+  const categoryMapping = {
+    'cardio': '有氧运动',
+    'aerobic': '有氧运动',
+    'strength': '力量训练',
+    'anaerobic': '无氧运动',
+    'stretch': '拉伸运动',
+    'stretching': '拉伸运动',
+    'other': '其他运动'
+  };
+  return categoryMapping[category] || '其他运动';
+};
+
+// 处理锻炼内容输入
+const handleContentInput = () => {
+  showDropdown.value = true;
+};
+
+// 显示下拉菜单
+const showTrainDropdown = () => {
+  showDropdown.value = true;
+};
+
+// 隐藏下拉菜单
+const hideTrainDropdown = () => {
+  setTimeout(() => {
+    showDropdown.value = false;
+  }, 200); // 延迟隐藏，让点击事件能够执行
+};
+
 // 提交表单
 const submitForm = () => {
   if (!validateForm()) return;
@@ -71,6 +125,8 @@ const cancelForm = () => {
   // 重置错误
   formErrors.value = { content: '', duration: '' };
   
+  showDropdown.value = false;
+  
   emit('cancel');
 };
 </script>
@@ -96,10 +152,38 @@ const cancelForm = () => {
         </view>
       </view>
     </view>
-    
-    <view class="form-item">
+      <view class="form-item">
       <text class="form-label">锻炼内容</text>
-      <input type="text" v-model="formData.content" placeholder="请输入锻炼内容" class="form-input" />
+      
+      <view class="content-input-container">
+        <input 
+          type="text" 
+          v-model="formData.content" 
+          placeholder="请输入锻炼内容"
+          class="form-input" 
+          @input="handleContentInput"
+          @focus="showTrainDropdown"
+          @blur="hideTrainDropdown"
+        />
+        
+        <!-- 预设训练下拉菜单 -->
+        <view 
+          v-if="showDropdown && filteredTrainLibrary.length > 0" 
+          class="train-dropdown"
+        >
+          <view 
+            v-for="train in filteredTrainLibrary" 
+            :key="train.id"
+            class="train-dropdown-item"
+            @click="selectTrain(train)"
+          >            <view class="train-info">
+              <text class="train-name">{{ train.name }}</text>
+            </view>
+            <text v-if="train.category" class="train-category">{{ getTrainCategoryName(train.category) }}</text>
+          </view>
+        </view>
+      </view>
+      
       <text v-if="formErrors.content" class="error-text">{{ formErrors.content }}</text>
     </view>
     
@@ -261,5 +345,79 @@ const cancelForm = () => {
 .submit-btn:active {
   transform: translateY(2rpx);
   box-shadow: 0 2rpx 6rpx rgba(76, 175, 80, 0.2);
+}
+
+/* 训练内容输入区域样式 */
+.content-input-container {
+  position: relative;
+}
+
+.train-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 10rpx 10rpx;
+  max-height: 500rpx;
+  overflow-y: scroll;
+  z-index: 999;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 美化滚动条 */
+.train-dropdown::-webkit-scrollbar {
+  width: 8rpx;
+}
+
+.train-dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10rpx;
+}
+
+.train-dropdown::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10rpx;
+}
+
+.train-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+.train-dropdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx;
+  border-bottom: 1px solid #f5f5f5;
+  transition: background-color 0.3s ease;
+}
+
+.train-dropdown-item:hover {
+  background-color: #f8f8f8;
+}
+
+.train-dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.train-info {
+  flex: 1;
+}
+
+.train-name {
+  font-size: 28rpx;
+  color: #333;
+  display: block;
+}
+
+.train-category {
+  font-size: 22rpx;
+  color: #999;
+  background-color: #f0f0f0;
+  padding: 4rpx 8rpx;
+  border-radius: 10rpx;
 }
 </style>

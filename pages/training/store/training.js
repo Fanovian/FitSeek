@@ -3,6 +3,10 @@ import { ref, computed } from 'vue';
 
 // 创建一个可以在组件外部使用的响应式状态
 const workoutRecords = ref([]);
+
+// 预设训练库
+const trainLibrary = ref([]);
+
 // 用户的训练目标
 const trainingTarget = ref({
   weeklyMinutes: 120  // 每周锻炼总时长目标（分钟）
@@ -17,54 +21,138 @@ const workoutTypes = [
 ];
 
 export const useTrainingStore = () => {
+  // 获取锻炼类型对应的中文名称
+  const getWorkoutTypeName = (type) => {
+    const typeMapping = {
+      'cardio': '有氧',
+      'strength': '无氧', 
+      'aerobic': '有氧',
+      'anaerobic': '无氧',
+      'stretch': '拉伸',
+      'streching': '拉伸',
+      'other': '其他'
+    };
+    return typeMapping[type] || '其他';
+  };
+
+  // 格式化时间戳（将ISO时间戳转换为本地格式）
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }).replace(/\//g, '-');
+  };
 
   // 从后端获取锻炼记录
   const fetchWorkoutRecords = () => {
-    // 实际项目中这里应该是API调用
-    // 现在用模拟数据替代
-    const mockData = [
-      {
-        id: 1,
-        workoutType: 'cardio',
-        typeName: '有氧',
-        content: '慢跑',
-        duration: '30',
-        createdAt: '2025-05-15 15:30:00'
-      },
-      {
-        id: 2,
-        workoutType: 'strength',
-        typeName: '无氧',
-        content: '哑铃卧推',
-        duration: '45',
-        createdAt: '2025-05-14 10:20:00'
-      },
-      {
-        id: 3,
-        workoutType: 'stretch',
-        typeName: '拉伸',
-        content: '瑜伽',
-        duration: '20',
-        createdAt: '2025-05-13 18:45:00'
-      }
-    ];
-    
-    workoutRecords.value = mockData;
-    return mockData;
+    return new Promise((resolve, reject) => {
+      uni.request({
+        url: 'https://api.fanovian.cc:3000/api/training/get',
+        method: 'GET',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + uni.getStorageSync('jwtToken')
+        },        
+        success: (res) => {
+          console.log('fetchWorkoutRecords API 返回值:', res);
+          console.log('fetchWorkoutRecords 数据:', res.data);
+          
+          if (res.statusCode === 200 && res.data.success) {
+            const records = res.data.records || [];
+            
+            // 将API数据转换为本地数据结构
+            const formattedRecords = records.map(record => ({
+              id: record.record_id,
+              workoutType: record.train_type || 'other',
+              typeName: getWorkoutTypeName(record.train_type || 'other'),
+              content: record.content || '未知运动',
+              duration: record.duration ? record.duration.toString() : '0',
+              createdAt: record.time ? formatTimestamp(record.time) : formatDate(new Date())
+            }));
+            
+            workoutRecords.value = formattedRecords;
+            resolve(formattedRecords);
+          } else {
+            console.error('获取锻炼记录失败:', res);
+            workoutRecords.value = [];
+            reject(new Error('获取锻炼记录失败'));
+          }
+        },
+        fail: (error) => {
+          console.error('API调用失败:', error);
+          workoutRecords.value = [];
+          reject(error);
+        }
+      });
+    });
   };
-
   // 添加新的锻炼记录
   const addWorkoutRecord = (record) => {
-    // 实际项目中应该先发送到后端，成功后再添加到本地状态
-    const newRecord = {
-      id: workoutRecords.value.length + 1,
-      ...record,
-      createdAt: formatDate(new Date())
-    };
-    
-    // 添加到列表开头
-    workoutRecords.value.unshift(newRecord);
-    return newRecord;
+    return new Promise((resolve, reject) => {
+      console.log('addWorkoutRecord 开始添加记录');
+      console.log('添加参数:', record);
+      
+      // 映射前端workoutType到后端train_type
+      const trainTypeMap = {
+        'cardio': 'aerobic',
+        'strength': 'anaerobic', 
+        'stretch': 'streching',
+        'other': 'other'
+      };
+      
+      const requestData = {
+        train_type: trainTypeMap[record.workoutType] || 'other',
+        duration: parseInt(record.duration),
+        content: record.content
+      };
+      
+      console.log('请求数据:', requestData);
+      console.log('JWT Token:', uni.getStorageSync('jwtToken'));
+      
+      uni.request({
+        url: 'https://api.fanovian.cc:3000/api/training/add',
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + uni.getStorageSync('jwtToken')
+        },
+        data: requestData,
+        success: (res) => {
+          console.log('addWorkoutRecord API 返回值:', res);
+          console.log('addWorkoutRecord 数据:', res.data);
+          
+          if (res.statusCode === 200 && res.data.success) {
+            const apiRecord = res.data.record;
+            
+            // 构建本地记录格式
+            const newRecord = {
+              id: apiRecord._id || apiRecord.record_id,
+              workoutType: record.workoutType, // 保持前端类型
+              typeName: record.typeName,
+              content: apiRecord.content,
+              duration: apiRecord.duration.toString(),
+              createdAt: apiRecord.time ? formatTimestamp(apiRecord.time) : formatDate(new Date())
+            };
+            
+            // 添加到本地状态的开头
+            workoutRecords.value.unshift(newRecord);
+            resolve(newRecord);
+          } else {
+            console.error('添加锻炼记录失败:', res);
+            reject(new Error('添加锻炼记录失败'));
+          }
+        },
+        fail: (error) => {
+          console.error('API调用失败:', error);
+          reject(error);
+        }
+      });
+    });
   };
 
   // 格式化日期
@@ -92,17 +180,86 @@ export const useTrainingStore = () => {
         return '/static/icons/training/other.svg';
     }
   };
-
   // 删除锻炼记录
   const deleteWorkoutRecord = (id) => {
-    // 实际项目中应该发送请求到后端删除
-    // 然后再删除本地数据
-    const index = workoutRecords.value.findIndex(record => record.id === id);
-    if (index !== -1) {
-      workoutRecords.value.splice(index, 1);
-      return true;
-    }
-    return false;
+    return new Promise((resolve, reject) => {
+      console.log('deleteWorkoutRecord 开始删除记录');
+      console.log('删除参数 - id:', id);
+      console.log('JWT Token:', uni.getStorageSync('jwtToken'));
+      
+      const requestData = {
+        record_id: id
+      };
+      console.log('请求数据:', requestData);
+      
+      uni.request({
+        url: 'https://api.fanovian.cc:3000/api/training/delete',
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + uni.getStorageSync('jwtToken')
+        },
+        data: requestData,
+        success: (res) => {
+          console.log('deleteWorkoutRecord API 返回值:', res);
+          console.log('deleteWorkoutRecord 数据:', res.data);
+          
+          if (res.statusCode === 200 && res.data.success) {
+            // API 删除成功后，删除本地数据
+            const index = workoutRecords.value.findIndex(record => record.id === id);
+            if (index !== -1) {
+              workoutRecords.value.splice(index, 1);
+              resolve(true);
+            } else {
+              resolve(false);
+            }
+          } else {
+            console.error('删除锻炼记录失败:', res);
+            reject(new Error('删除锻炼记录失败'));
+          }
+        },
+        fail: (error) => {
+          console.error('API调用失败:', error);
+          reject(error);
+        }
+      });
+    });  };
+  
+  // 获取预设训练库
+  const fetchTrainLibrary = () => {
+    return new Promise((resolve, reject) => {
+      uni.request({
+        url: 'https://api.fanovian.cc:3000/api/trainlib/get',
+        method: 'GET',
+        header: {
+          'Content-Type': 'application/json'
+        },
+        success: (res) => {
+          console.log('fetchTrainLibrary API 返回值:', res);
+          console.log('fetchTrainLibrary 数据:', res.data);
+          
+          if (res.statusCode === 200 && res.data.success) {
+            const trains = res.data.trains || [];
+            trainLibrary.value = trains.map(train => ({
+              id: train._id,
+              name: train.name,
+              category: train.category,
+              note: train.note || ''
+            }));
+            resolve(trainLibrary.value);
+          } else {
+            console.error('获取训练库失败:', res);
+            trainLibrary.value = [];
+            resolve([]);
+          }
+        },
+        fail: (error) => {
+          console.error('获取训练库API调用失败:', error);
+          trainLibrary.value = [];
+          resolve([]);
+        }
+      });
+    });
   };
   
   // 获取用户的训练目标
@@ -147,15 +304,16 @@ export const useTrainingStore = () => {
       })
       .reduce((total, record) => total + parseInt(record.duration), 0);
   });
-  
-  return {
+    return {
     workoutRecords,
     workoutTypes,
+    trainLibrary,
     trainingTarget,
     weeklyMinutesCompleted,
     fetchWorkoutRecords,
     addWorkoutRecord,
     deleteWorkoutRecord,
+    fetchTrainLibrary,
     getWorkoutTypeIcon,
     formatDate,
     fetchTrainingTarget,

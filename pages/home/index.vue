@@ -1,6 +1,5 @@
 <!-- pages/home/index.vue -->
-<template>
-  <view class="container">
+<template>  <view class="container">
     <!-- 顶部信息栏 -->
     <view class="top-section">
       <view class="target-info">
@@ -18,6 +17,9 @@
         <text class="value">{{ currentBMI }}</text>
       </view>
     </view>
+    
+    <!-- 添加健康记录按钮 -->
+    <AddHealthRecordForm @record-added="handleRecordAdded" />
 
     <!-- 数据卡片容器 -->
     <scroll-view 
@@ -58,10 +60,10 @@ import BloodOxygenCard from '@/pages/home/components/BloodOxygenCard.vue';
 import HeartRateCard from '@/pages/home/components/HeartRateCard.vue';
 import AnnouncementCard from '@/pages/home/components/AnnouncementCard.vue';
 import ArticleCard from '@/pages/home/components/ArticleCard.vue';
+import AddHealthRecordForm from '@/pages/home/components/AddHealthRecordForm.vue';
 import errorReport from '@/utils/errorReport.js';
 
-export default {
-  components: {
+export default {  components: {
     WeightCard,
     BodyFatCard,
     TrainingCard,
@@ -69,6 +71,7 @@ export default {
     HeartRateCard,
     AnnouncementCard,
     ArticleCard,
+    AddHealthRecordForm,
   },
   data() {
     return {
@@ -170,12 +173,31 @@ export default {
         }
       ],
     };
-  },
-  methods: {
+  },  methods: {
+    // 处理健康记录添加后的刷新
+    handleRecordAdded(type) {
+      // 根据添加的记录类型刷新对应的数据
+      switch(type) {
+        case 'weight':
+          this.fetchWeightRecords();
+          this.fetchCurrentWeightAndBMI();
+          break;
+        case 'body_fat':
+          this.fetchBodyFatRecords();
+          break;
+        case 'heart_rate':
+          this.fetchHeartRateRecords();
+          break;
+        case 'blood_oxygen':
+          this.fetchBloodOxygenRecords();
+          break;
+      }
+    },
     // 获取体重记录
     async fetchWeightRecords() {
       try {
         const token = uni.getStorageSync('jwtToken');
+        console.log('Fetching weight records with token:', token);
         const res = await uni.request({
           url: 'https://api.fanovian.cc:3000/api/fitness/get',
           method: 'GET',
@@ -529,6 +551,7 @@ export default {
   padding: 20rpx; /* 移到这里 */
   box-sizing: border-box;
   overflow-y: scroll;
+  padding-bottom: 140rpx; /* 为底部按钮留出空间 */
 }
 
 .card-list {
