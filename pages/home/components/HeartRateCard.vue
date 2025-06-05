@@ -1,11 +1,15 @@
 <template>
   <view class="card heart-rate-card" @click="goDetail">
-    <view class="card-title">心率</view>
-    <view class="card-content">
-      <view v-for="(item, idx) in recentRecords" :key="idx" class="record-line">
-        <text>{{ item.time.slice(11, 16) }}</text>
-        <text class="value">{{ item.value }}bpm</text>
-        <text :class="{ positive: item.change.startsWith('+'), negative: item.change.startsWith('-') }">{{ item.change }}</text>
+    <view class="card-title">心率</view>    <view class="card-content">      <view v-for="(item, idx) in recentRecords" :key="idx" class="record-line">
+        <view class="record-info">
+          <text>{{ item.time.slice(11, 16) }}</text>
+          <text class="value">{{ item.value }}bpm</text>
+          <text :class="{ positive: item.change.startsWith('+'), negative: item.change.startsWith('-') }">{{ item.change }}</text>
+        </view>
+        <view class="action-buttons">
+          <text class="modify-btn" @click.stop="modifyRecord(item)">修改</text>
+          <text class="delete-btn" @click.stop="deleteRecord(item)">删除</text>
+        </view>
       </view>
     </view>
   </view>
@@ -24,12 +28,16 @@ export default {
     recentRecords() {
       return this.records.slice(0, 3);
     }
-  },
-  methods: {
+  },  methods: {
     goDetail() {
       uni.navigateTo({
         url: '/pages/home/heart_rate_detail?data=' + encodeURIComponent(JSON.stringify(this.records))
       });
+    },    deleteRecord(item) {
+      this.$emit('delete', item.id);
+    },
+    modifyRecord(item) {
+      this.$emit('modify', item);
     }
   }
 }
@@ -73,5 +81,40 @@ export default {
 }
 .negative {
   color: #1976d2;
+}
+.record-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+.action-buttons {
+  display: flex;
+  gap: 12rpx;
+}
+.modify-btn {
+  color: #1976d2;
+  font-size: 24rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+  border: 1px solid #1976d2;
+  background-color: rgba(25, 118, 210, 0.1);
+  transition: all 0.2s;
+}
+.modify-btn:hover {
+  background-color: #1976d2;
+  color: #ffffff;
+}
+.delete-btn {
+  font-size: 24rpx;
+  color: #ff4757;
+  padding: 8rpx 16rpx;
+  border: 1px solid #ff4757;
+  border-radius: 8rpx;
+  background-color: rgba(255, 71, 87, 0.1);
+  transition: all 0.2s;
+}
+.delete-btn:hover {
+  background-color: #ff4757;
+  color: #ffffff;
 }
 </style>

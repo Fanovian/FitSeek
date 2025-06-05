@@ -186,7 +186,71 @@ export const useRecipeStore = () => {
         }
       });
     });
-  };  // 删除饮食记录
+  };  
+
+  // 修改饮食记录
+  const modifyMealRecord = (recordId, mealData) => {
+    return new Promise((resolve, reject) => {
+      // 将中文餐食类型转换为英文
+      const englishMealType = mealTypeMap[mealData.type] || 'snack';
+      
+      uni.request({
+        url: 'https://api.fanovian.cc:3000/api/diet/modify',
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + uni.getStorageSync('jwtToken')
+        },
+        data: {
+          record_id: recordId,
+          meal_type: englishMealType,
+          calories: parseInt(mealData.calories),
+          food_name: mealData.name
+        },
+        success: (res) => {
+          console.log('modifyMealRecord API 返回值:', res);
+          if (res.statusCode === 200 && res.data.success) {
+            const apiRecord = res.data.record;
+            
+            // 构建本地记录格式
+            const updatedRecord = {
+              id: apiRecord.record_id,
+              type: englishToChineseMap[apiRecord.meal_type] || apiRecord.meal_type,
+              name: apiRecord.food_name,
+              calories: apiRecord.calories,
+              timestamp: new Date(apiRecord.created_at).toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+              }).replace(/\//g, '-')
+            };
+            
+            // 更新本地数据
+            for (let day of mealHistory.value) {
+              const mealIndex = day.meals.findIndex(meal => meal.id === recordId);
+              if (mealIndex !== -1) {
+                day.meals[mealIndex] = updatedRecord;
+                break;
+              }
+            }
+            
+            resolve(updatedRecord);
+          } else {
+            console.error('修改饮食记录失败:', res);
+            reject(new Error('修改饮食记录失败'));
+          }
+        },
+        fail: (error) => {
+          console.error('修改饮食记录API调用失败:', error);
+          reject(error);
+        }
+      });
+    });
+  };
+
+  // 删除饮食记录
   const deleteMealRecord = (date, id) => {
     return new Promise((resolve, reject) => {
       console.log('deleteMealRecord 开始删除记录');
@@ -334,6 +398,7 @@ export const useRecipeStore = () => {
     todayCalorieIntake,
     fetchMealHistory,
     addMealRecord,
+    modifyMealRecord,
     deleteMealRecord,
     updateCalorieTarget,
     getTodayDateString,

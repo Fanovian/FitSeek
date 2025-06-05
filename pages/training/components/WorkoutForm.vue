@@ -1,5 +1,5 @@
 <script setup>
-import { ref, defineProps, defineEmits, computed } from 'vue';
+import { ref, defineProps, defineEmits, computed, watch } from 'vue';
 
 const props = defineProps({
   workoutTypes: {
@@ -9,6 +9,14 @@ const props = defineProps({
   trainLibrary: {
     type: Array,
     default: () => []
+  },
+  editingWorkout: {
+    type: Object,
+    default: null
+  },
+  isEditing: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -20,6 +28,23 @@ const formData = ref({
   content: '',
   duration: '',
 });
+
+// 监听编辑数据变化，初始化表单
+watch(() => props.editingWorkout, (editingWorkout) => {
+  if (editingWorkout && props.isEditing) {
+    formData.value = {
+      workoutType: editingWorkout.workoutType,
+      content: editingWorkout.content,
+      duration: editingWorkout.duration
+    };
+  } else {
+    formData.value = {
+      workoutType: 'cardio',
+      content: '',
+      duration: ''
+    };
+  }
+}, { immediate: true });
 
 // 控制下拉菜单显示
 const showDropdown = ref(false);
@@ -114,10 +139,12 @@ const submitForm = () => {
     duration: formData.value.duration,
   });
   
-  // 重置表单
-  formData.value.content = '';
-  formData.value.duration = '';
-  formErrors.value = { content: '', duration: '' };
+  // 重置表单（只在非编辑模式下重置）
+  if (!props.isEditing) {
+    formData.value.content = '';
+    formData.value.duration = '';
+    formErrors.value = { content: '', duration: '' };
+  }
 };
 
 // 取消
@@ -131,10 +158,9 @@ const cancelForm = () => {
 };
 </script>
 
-<template>
-  <view class="form-section">
+<template>  <view class="form-section">
     <view class="form-header">
-      <text class="form-title">添加锻炼记录</text>
+      <text class="form-title">{{ isEditing ? '修改锻炼记录' : '添加锻炼记录' }}</text>
     </view>
     
     <view class="form-item">
@@ -192,10 +218,9 @@ const cancelForm = () => {
       <input type="number" v-model="formData.duration" placeholder="请输入锻炼时长" class="form-input" />
       <text v-if="formErrors.duration" class="error-text">{{ formErrors.duration }}</text>
     </view>
-    
-    <view class="form-actions">
+      <view class="form-actions">
       <button class="cancel-btn" @click="cancelForm">取消</button>
-      <button class="submit-btn" @click="submitForm">保存</button>
+      <button class="submit-btn" @click="submitForm">{{ isEditing ? '更新' : '保存' }}</button>
     </view>
   </view>
 </template>

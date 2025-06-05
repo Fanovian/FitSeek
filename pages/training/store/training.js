@@ -155,6 +155,76 @@ export const useTrainingStore = () => {
     });
   };
 
+  // 修改锻炼记录
+  const modifyWorkoutRecord = (recordId, record) => {
+    return new Promise((resolve, reject) => {
+      console.log('modifyWorkoutRecord 开始修改记录');
+      console.log('修改参数 - recordId:', recordId);
+      console.log('修改参数 - record:', record);
+      
+      // 映射前端workoutType到后端train_type
+      const trainTypeMap = {
+        'cardio': 'aerobic',
+        'strength': 'anaerobic', 
+        'stretch': 'streching',
+        'other': 'other'
+      };
+      
+      const requestData = {
+        record_id: recordId,
+        train_type: trainTypeMap[record.workoutType] || 'other',
+        duration: parseInt(record.duration),
+        content: record.content
+      };
+      
+      console.log('请求数据:', requestData);
+      console.log('JWT Token:', uni.getStorageSync('jwtToken'));
+      
+      uni.request({
+        url: 'https://api.fanovian.cc:3000/api/training/modify',
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + uni.getStorageSync('jwtToken')
+        },
+        data: requestData,
+        success: (res) => {
+          console.log('modifyWorkoutRecord API 返回值:', res);
+          console.log('modifyWorkoutRecord 数据:', res.data);
+          
+          if (res.statusCode === 200 && res.data.success) {
+            const apiRecord = res.data.record;
+            
+            // 构建本地记录格式
+            const updatedRecord = {
+              id: apiRecord.record_id,
+              workoutType: record.workoutType, // 保持前端类型
+              typeName: record.typeName,
+              content: apiRecord.content,
+              duration: apiRecord.duration.toString(),
+              createdAt: apiRecord.time ? formatTimestamp(apiRecord.time) : formatDate(new Date())
+            };
+            
+            // 更新本地数据
+            const index = workoutRecords.value.findIndex(r => r.id === recordId);
+            if (index !== -1) {
+              workoutRecords.value[index] = updatedRecord;
+            }
+            
+            resolve(updatedRecord);
+          } else {
+            console.error('修改锻炼记录失败:', res);
+            reject(new Error('修改锻炼记录失败'));
+          }
+        },
+        fail: (error) => {
+          console.error('修改锻炼记录API调用失败:', error);
+          reject(error);
+        }
+      });
+    });
+  };
+
   // 格式化日期
   const formatDate = (date) => {
     const year = date.getFullYear();
@@ -317,6 +387,7 @@ export const useTrainingStore = () => {
     getWorkoutTypeIcon,
     formatDate,
     fetchTrainingTarget,
-    updateTrainingTarget
+    updateTrainingTarget,
+    modifyWorkoutRecord
   };
 };
