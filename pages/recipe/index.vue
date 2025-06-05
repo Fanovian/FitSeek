@@ -16,6 +16,7 @@ const {
   todayCalorieIntake,
   fetchMealHistory, 
   addMealRecord, 
+  modifyMealRecord,
   deleteMealRecord,
   updateCalorieTarget,
   formatDateDisplay,
@@ -24,6 +25,10 @@ const {
 
 // 是否显示添加表单
 const showAddForm = ref(false);
+// 是否显示编辑表单
+const showEditForm = ref(false);
+// 当前编辑的记录
+const editingMeal = ref(null);
 
 // 添加新的饮食记录
 const addMeal = async (formData) => {
@@ -45,6 +50,41 @@ const addMeal = async (formData) => {
     });
     errorReport(error, 'addMeal', '/pages/recipe/index');
   }
+};
+
+// 处理修改饮食记录
+const handleEditRecord = (meal) => {
+  editingMeal.value = meal;
+  showEditForm.value = true;
+  showAddForm.value = false; // 确保添加表单关闭
+};
+
+// 修改饮食记录
+const modifyMeal = async (formData) => {
+  try {
+    await modifyMealRecord(editingMeal.value.id, formData);
+    
+    // 关闭编辑表单
+    showEditForm.value = false;
+    editingMeal.value = null;
+    
+    uni.showToast({
+      title: '修改成功',
+      icon: 'success'
+    });
+  } catch (error) {
+    uni.showToast({
+      title: '修改失败',
+      icon: 'error'
+    });
+    errorReport(error, 'modifyMeal', '/pages/recipe/index');
+  }
+};
+
+// 取消编辑
+const cancelEdit = () => {
+  showEditForm.value = false;
+  editingMeal.value = null;
 };
 
 // 处理删除饮食记录
@@ -103,10 +143,8 @@ onMounted(async () => {
       :calorie-target="calorieTarget" 
       :today-calorie-intake="todayCalorieIntake"
       @update-target="handleUpdateTarget"
-    />
-
-    <!-- 添加记录按钮 -->
-    <view class="add-meal-section" v-if="!showAddForm">
+    />    <!-- 添加记录按钮 -->
+    <view class="add-meal-section" v-if="!showAddForm && !showEditForm">
       <button class="add-meal-btn" @click="showAddForm = true">+ 添加饮食记录</button>
     </view>
       <!-- 添加饮食记录表单 -->
@@ -114,8 +152,19 @@ onMounted(async () => {
       v-if="showAddForm"
       :meal-types="mealTypes"
       :food-library="foodLibrary"
+      :is-editing="false"
       @submit="addMeal"
       @cancel="showAddForm = false"
+    />
+    <!-- 修改饮食记录表单 -->
+    <meal-form 
+      v-if="showEditForm"
+      :meal-types="mealTypes"
+      :food-library="foodLibrary"
+      :editing-meal="editingMeal"
+      :is-editing="true"
+      @submit="modifyMeal"
+      @cancel="cancelEdit"
     />
     
     <!-- 饮食历史记录 -->
@@ -123,6 +172,7 @@ onMounted(async () => {
       :meal-history="mealHistory" 
       :format-date-display="formatDateDisplay"
       @delete="handleDeleteRecord"
+      @edit="handleEditRecord"
     />
   </view>
 </template>

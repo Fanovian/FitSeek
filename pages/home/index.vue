@@ -31,8 +31,7 @@
       <view class="card-list">
         <!-- 公告和文章卡片 -->
         <AnnouncementCard :announcements="announcementList" @click="goToAnnouncementList" />
-        <ArticleCard :articles="articleList" @click="goToArticleList" />
-        <!-- 体重记录 -->
+        <ArticleCard :articles="articleList" @click="goToArticleList" />        <!-- 体重记录 -->
         <WeightCard 
           :records="weightRecords"
         />
@@ -41,15 +40,16 @@
           :records="bodyFatRecords"
         />
         <!-- 血氧记录 -->
-        <BloodOxygenCard :records="bloodOxygenRecords" />
+        <BloodOxygenCard 
+          :records="bloodOxygenRecords" 
+        />
         <!-- 心率记录 -->
-        <HeartRateCard :records="heartRateRecords" />
-
-        <!-- 锻炼记录 -->
+        <HeartRateCard 
+          :records="heartRateRecords" 
+        />        <!-- 锻炼记录 -->
         <!-- <TrainingCard 
           :records="trainingRecords"
-        /> -->
-      </view>
+        /> -->      </view>
     </scroll-view>
   </view>
 </template>
@@ -84,10 +84,8 @@ export default {
       bloodOxygenRecords: [],
       heartRateRecords: [],
       announcementList: [],
-      articleList: [],
-      currentWeight: '--',
-      currentBMI: '--',
-      height: null, // 动态获取
+      articleList: [],      currentWeight: '--',
+      currentBMI: '--',      height: null, // 动态获取
       targetWeight: null, // 动态获取
       distanceToGoal: '--', // 新增
     };
@@ -123,9 +121,7 @@ export default {
           header: {
             Authorization: token ? 'Bearer ' + token : ''
           }
-        });
-        if (res.data && res.data.success) {
-          // 只取type为weight的记录，按时间倒序
+        });        if (res.data && res.data.success) {          // 只取type为weight的记录，按时间倒序
           const records = (res.data.records || []).filter(r => r.type === 'weight')
             .sort((a, b) => new Date(b.time) - new Date(a.time))
             .map((r, i, arr) => {
@@ -137,7 +133,15 @@ export default {
               } else {
                 change = '--';
               }
-              return { date: r.time.slice(0, 10), value, change };
+              return { 
+                id: r.record_id, 
+                date: r.time.slice(0, 10), 
+                time: r.time,
+                value, 
+                originalValue: r.value,
+                change,
+                note: r.note || ''
+              };
             });
           this.weightRecords = records;
         } else {
@@ -159,8 +163,7 @@ export default {
             Authorization: token ? 'Bearer ' + token : ''
           }
         });
-        if (res.data && res.data.success) {
-          // 只取type为body_fat的记录，按时间倒序
+        if (res.data && res.data.success) {          // 只取type为body_fat的记录，按时间倒序
           const records = (res.data.records || []).filter(r => r.type === 'body_fat')
             .sort((a, b) => new Date(b.time) - new Date(a.time))
             .map((r, i, arr) => {
@@ -171,8 +174,15 @@ export default {
                 change = (diff > 0 ? '+' : '') + diff + '%';
               } else {
                 change = '--';
-              }
-              return { date: r.time.slice(0, 10), value, change };
+              }              return { 
+                id: r.record_id, 
+                date: r.time.slice(0, 10), 
+                time: r.time,
+                value, 
+                originalValue: r.value,
+                change,
+                note: r.note || ''
+              };
             });
           this.bodyFatRecords = records;
         } else {
@@ -234,8 +244,7 @@ export default {
             Authorization: token ? 'Bearer ' + token : ''
           }
         });
-        if (res.data && res.data.success) {
-          // 只取type为blood_oxygen的记录，按时间倒序
+        if (res.data && res.data.success) {          // 只取type为blood_oxygen的记录，按时间倒序
           const records = (res.data.records || []).filter(r => r.type === 'blood_oxygen')
             .sort((a, b) => new Date(b.time) - new Date(a.time))
             .map((r, i, arr) => {
@@ -245,11 +254,14 @@ export default {
                 change = (diff > 0 ? '+' : '') + diff + '%';
               } else {
                 change = '--';
-              }
-              return {
+              }              return {
+                id: r.record_id,
                 time: r.time.replace('T', ' ').slice(0, 16),
+                originalTime: r.time,
                 value: r.value.toFixed(1),
-                change
+                originalValue: r.value,
+                change,
+                note: r.note || ''
               };
             });
           this.bloodOxygenRecords = records;
@@ -272,8 +284,7 @@ export default {
             Authorization: token ? 'Bearer ' + token : ''
           }
         });
-        if (res.data && res.data.success) {
-          // 只取type为heart_rate的记录，按时间倒序
+        if (res.data && res.data.success) {          // 只取type为heart_rate的记录，按时间倒序
           const records = (res.data.records || []).filter(r => r.type === 'heart_rate')
             .sort((a, b) => new Date(b.time) - new Date(a.time))
             .map((r, i, arr) => {
@@ -283,11 +294,14 @@ export default {
                 change = (diff > 0 ? '+' : '') + diff + 'bpm';
               } else {
                 change = '--';
-              }
-              return {
+              }              return {
+                id: r.record_id,
                 time: r.time.replace('T', ' ').slice(0, 16),
+                originalTime: r.time,
                 value: r.value,
-                change
+                originalValue: r.value,
+                change,
+                note: r.note || ''
               };
             });
           this.heartRateRecords = records;
@@ -393,8 +407,7 @@ export default {
         uni.navigateTo({ url: '/pages/home/article_list' });
       } catch (e) {
         errorReport(e, 'goToArticleList', '/pages/home/index');
-      }
-    },
+      }    },
   },
   async created() {
     try {

@@ -57,23 +57,33 @@ export const useTrainingStore = () => {
         header: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + uni.getStorageSync('jwtToken')
-        },        
-        success: (res) => {
+        },          success: (res) => {
           console.log('fetchWorkoutRecords API 返回值:', res);
           console.log('fetchWorkoutRecords 数据:', res.data);
           
           if (res.statusCode === 200 && res.data.success) {
             const records = res.data.records || [];
             
-            // 将API数据转换为本地数据结构
-            const formattedRecords = records.map(record => ({
-              id: record.record_id,
-              workoutType: record.train_type || 'other',
-              typeName: getWorkoutTypeName(record.train_type || 'other'),
-              content: record.content || '未知运动',
-              duration: record.duration ? record.duration.toString() : '0',
-              createdAt: record.time ? formatTimestamp(record.time) : formatDate(new Date())
-            }));
+            // 后端类型到前端类型的反向映射
+            const backendToFrontendTypeMap = {
+              'aerobic': 'cardio',
+              'anaerobic': 'strength',
+              'streching': 'stretch',
+              'other': 'other'
+            };
+              // 将API数据转换为本地数据结构
+            const formattedRecords = records.map(record => {
+              const frontendType = backendToFrontendTypeMap[record.train_type] || 'other';
+              return {
+                id: record.record_id,
+                workoutType: frontendType, // 使用前端类型
+                typeName: getWorkoutTypeName(record.train_type || 'other'),
+                content: record.content || '未知运动',
+                duration: record.duration ? record.duration.toString() : '0',
+                createdAt: record.time ? formatTimestamp(record.time) : formatDate(new Date()),
+                originalTime: record.time // 保存原始时间用于计算
+              };
+            });
             
             workoutRecords.value = formattedRecords;
             resolve(formattedRecords);
@@ -104,10 +114,9 @@ export const useTrainingStore = () => {
         'stretch': 'streching',
         'other': 'other'
       };
-      
-      const requestData = {
+        const requestData = {
         train_type: trainTypeMap[record.workoutType] || 'other',
-        duration: parseInt(record.duration),
+        duration: parseInt(record.duration) || 0,
         content: record.content
       };
       
@@ -128,15 +137,15 @@ export const useTrainingStore = () => {
           
           if (res.statusCode === 200 && res.data.success) {
             const apiRecord = res.data.record;
-            
-            // 构建本地记录格式
+              // 构建本地记录格式
             const newRecord = {
-              id: apiRecord._id || apiRecord.record_id,
+              id: apiRecord.record_id,
               workoutType: record.workoutType, // 保持前端类型
               typeName: record.typeName,
               content: apiRecord.content,
               duration: apiRecord.duration.toString(),
-              createdAt: apiRecord.time ? formatTimestamp(apiRecord.time) : formatDate(new Date())
+              createdAt: apiRecord.time ? formatTimestamp(apiRecord.time) : formatDate(new Date()),
+              originalTime: apiRecord.time // 保存原始时间用于计算
             };
             
             // 添加到本地状态的开头
@@ -149,6 +158,75 @@ export const useTrainingStore = () => {
         },
         fail: (error) => {
           console.error('API调用失败:', error);
+          reject(error);
+        }
+      });
+    });
+  };
+
+  // 修改锻炼记录
+  const modifyWorkoutRecord = (recordId, record) => {
+    return new Promise((resolve, reject) => {
+      console.log('modifyWorkoutRecord 开始修改记录');
+      console.log('修改参数 - recordId:', recordId);
+      console.log('修改参数 - record:', record);
+      
+      // 映射前端workoutType到后端train_type
+      const trainTypeMap = {
+        'cardio': 'aerobic',
+        'strength': 'anaerobic', 
+        'stretch': 'streching',
+        'other': 'other'
+      };
+        const requestData = {
+        record_id: recordId,
+        train_type: trainTypeMap[record.workoutType] || 'other',
+        duration: parseInt(record.duration) || 0,
+        content: record.content
+      };
+      
+      console.log('请求数据:', requestData);
+      console.log('JWT Token:', uni.getStorageSync('jwtToken'));
+      
+      uni.request({
+        url: 'https://api.fanovian.cc:3000/api/training/modify',
+        method: 'POST',
+        header: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + uni.getStorageSync('jwtToken')
+        },
+        data: requestData,
+        success: (res) => {
+          console.log('modifyWorkoutRecord API 返回值:', res);
+          console.log('modifyWorkoutRecord 数据:', res.data);
+          
+          if (res.statusCode === 200 && res.data.success) {
+            const apiRecord = res.data.record;
+              // 构建本地记录格式
+            const updatedRecord = {
+              id: apiRecord.record_id,
+              workoutType: record.workoutType, // 保持前端类型
+              typeName: record.typeName,
+              content: apiRecord.content,
+              duration: apiRecord.duration.toString(),
+              createdAt: apiRecord.time ? formatTimestamp(apiRecord.time) : formatDate(new Date()),
+              originalTime: apiRecord.time // 保存原始时间用于计算
+            };
+            
+            // 更新本地数据
+            const index = workoutRecords.value.findIndex(r => r.id === recordId);
+            if (index !== -1) {
+              workoutRecords.value[index] = updatedRecord;
+            }
+            
+            resolve(updatedRecord);
+          } else {
+            console.error('修改锻炼记录失败:', res);
+            reject(new Error('修改锻炼记录失败'));
+          }
+        },
+        fail: (error) => {
+          console.error('修改锻炼记录API调用失败:', error);
           reject(error);
         }
       });
@@ -286,10 +364,9 @@ export const useTrainingStore = () => {
     }
     return Promise.reject(new Error('训练目标必须为正数'));
   };
+    // 该函数已移除 - 不再计算每周锻炼次数
   
-  // 该函数已移除 - 不再计算每周锻炼次数
-  
-  // 计算本周已完成的锻炼时长（分钟）
+  // 计算本周已完成的锻炼时长（分钟）  
   const weeklyMinutesCompleted = computed(() => {
     const now = new Date();
     const startOfWeek = new Date(now);
@@ -299,10 +376,23 @@ export const useTrainingStore = () => {
     // 筛选出本周的记录，并计算总时长
     return workoutRecords.value
       .filter(record => {
-        const recordDate = new Date(record.createdAt);
-        return recordDate >= startOfWeek;
+        // 优先使用原始时间进行比较，确保准确性
+        let recordDate;
+        if (record.originalTime) {
+          recordDate = new Date(record.originalTime);
+        } else {
+          // 兼容老数据：从格式化时间中提取日期部分
+          const recordDateString = record.createdAt.split(' ')[0];
+          recordDate = new Date(recordDateString);
+        }
+        
+        // 验证日期有效性并检查是否在本周范围内
+        return !isNaN(recordDate.getTime()) && recordDate >= startOfWeek;
       })
-      .reduce((total, record) => total + parseInt(record.duration), 0);
+      .reduce((total, record) => {
+        const duration = parseInt(record.duration || 0);
+        return total + (isNaN(duration) ? 0 : duration);
+      }, 0);
   });
     return {
     workoutRecords,
@@ -317,6 +407,7 @@ export const useTrainingStore = () => {
     getWorkoutTypeIcon,
     formatDate,
     fetchTrainingTarget,
-    updateTrainingTarget
+    updateTrainingTarget,
+    modifyWorkoutRecord
   };
 };

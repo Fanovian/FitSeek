@@ -1,13 +1,13 @@
 <!-- components/WeightCard.vue -->
 <template>
     <view class="card weight-card" @click="navigateToDetail">
-      <view class="card-title">体重记录</view>
-      <view class="card-content">
-        <view v-for="(item, index) in recentRecords" :key="index" class="record-line">
-          <text>{{ item.date }} - {{ item.value }}</text>
-          <text :class="{ positive: item.change.startsWith('+'), negative: item.change.startsWith('-') }">
-            {{ item.change }}
-          </text>
+      <view class="card-title">体重记录</view>      <view class="card-content">        <view v-for="(item, index) in recentRecords" :key="index" class="record-line">
+          <view class="record-info">
+            <text>{{ item.date }} - {{ item.value }}</text>
+            <text :class="{ positive: item.change.startsWith('+'), negative: item.change.startsWith('-') }">
+              {{ item.change }}
+            </text>
+          </view>
         </view>
       </view>
     </view>
@@ -59,12 +59,16 @@ export default {
     flex-direction: column;
     gap: 10rpx;
   }
-  
-  .record-line {
+    .record-line {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+  }    .record-info {
+    display: flex;
+    justify-content: space-between;
+    flex: 1;
   }
-  
+
   .positive { color: #4CAF50; }
   .negative { color: #F44336; }
   </style>

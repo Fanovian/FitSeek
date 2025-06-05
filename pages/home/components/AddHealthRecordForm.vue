@@ -129,11 +129,11 @@ export default {
     onTimeChange(e) {
       this.timeValue = e.detail.value;
       this.updateRecordTime();
-    },
-    updateRecordTime() {
+    },    updateRecordTime() {
       if (this.dateValue && this.timeValue) {
-        // 组装成 JS 标准 Date 字符串
-        this.recordTime = this.dateValue + 'T' + this.timeValue + ':00';
+        // 构造完整的时间字符串并转换为ISO 8601格式
+        const timeString = this.dateValue + 'T' + this.timeValue + ':00';
+        this.recordTime = new Date(timeString).toISOString();
       } else {
         this.recordTime = '';
       }
@@ -145,12 +145,11 @@ export default {
         if (!token) {
           uni.showToast({ title: '请先登录', icon: 'none' });
           return;
-        }
-        // 构建请求数据
+        }        // 构建请求数据
         const requestData = {
           type: this.selectedType,
           value: Number(this.recordValue),
-          time: this.recordTime ? new Date(this.recordTime) : undefined,
+          time: this.recordTime || undefined,
           note: this.recordNote || undefined
         };
         

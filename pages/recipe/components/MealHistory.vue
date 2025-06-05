@@ -17,7 +17,7 @@ import { useRecipeStore } from '../store/recipe.js';
 const recipeStore = useRecipeStore();
 const { getMealTypeIcon } = recipeStore;
 
-const emit = defineEmits(['delete']);
+const emit = defineEmits(['delete', 'edit']);
 
 // 删除记录
 const deleteMeal = (date, id) => {
@@ -30,6 +30,11 @@ const deleteMeal = (date, id) => {
       }
     }
   });
+};
+
+// 修改记录
+const editMeal = (meal) => {
+  emit('edit', meal);
 };
 </script>
 
@@ -49,10 +54,12 @@ const deleteMeal = (date, id) => {
           </view>
           <text class="food-name">{{ meal.name }}</text>
           <text class="food-time">{{ meal.timestamp.split(' ')[1] }}</text>
-        </view>
-        <view class="food-details">
+        </view>        <view class="food-details">
           <text class="food-calories">{{ meal.calories }} kcal</text>
-          <text class="delete-btn" @click="deleteMeal(day.date, meal.id)">删除</text>
+          <view class="action-buttons">
+            <text class="edit-btn" @click="editMeal(meal)">修改</text>
+            <text class="delete-btn" @click="deleteMeal(day.date, meal.id)">删除</text>
+          </view>
         </view>
       </view>
       
@@ -167,15 +174,35 @@ const deleteMeal = (date, id) => {
   font-weight: bold;
 }
 
-.delete-btn {
-  font-size: 24rpx;
-  color: #ff4d4f;
+.action-buttons {
+  display: flex;
+  gap: 15rpx;
   margin-top: 10rpx;
+}
+
+.edit-btn, .delete-btn {
+  font-size: 24rpx;
   padding: 4rpx 12rpx;
   border-radius: 20rpx;
-  border: 1px solid #ff4d4f;
-  background-color: rgba(255, 77, 79, 0.05);
+  border: 1px solid;
   transition: all 0.3s;
+}
+
+.edit-btn {
+  color: #1890ff;
+  border-color: #1890ff;
+  background-color: rgba(24, 144, 255, 0.05);
+}
+
+.edit-btn:active {
+  background-color: rgba(24, 144, 255, 0.1);
+  color: #0066cc;
+}
+
+.delete-btn {
+  color: #ff4d4f;
+  border-color: #ff4d4f;  
+  background-color: rgba(255, 77, 79, 0.05);
 }
 
 .delete-btn:active {
