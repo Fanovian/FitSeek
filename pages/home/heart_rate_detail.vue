@@ -47,17 +47,6 @@ export default {
       screenWidth,
       svgHeight: Math.max(160, Math.floor(screenWidth * 0.45)),
       chartData: { categories: [], series: [] },
-      sampleRecords: [
-        { time: '2025-06-04 09:00', value: '72', change: '+2bpm' },
-        { time: '2025-06-04 08:00', value: '70', change: '+1bpm' },
-        { time: '2025-06-04 07:00', value: '69', change: '-1bpm' },
-        { time: '2025-06-04 06:00', value: '70', change: '+2bpm' },
-        { time: '2025-06-04 05:00', value: '68', change: '-2bpm' },
-        { time: '2025-06-04 04:00', value: '70', change: '+1bpm' },
-        { time: '2025-06-04 03:00', value: '69', change: '-1bpm' },
-        { time: '2025-06-04 02:00', value: '70', change: '+1bpm' },
-        { time: '2025-06-04 01:00', value: '69', change: '-1bpm' },
-      ]
     };
   },
   computed: {
@@ -101,13 +90,10 @@ export default {
                 change
               };
             });
-          this.detailedRecords = records.length ? records : this.sampleRecords;
-        } else {
-          this.detailedRecords = this.sampleRecords;
+          this.detailedRecords = records;
         }
       } catch (e) {
         errorReport(e, 'fetchHeartRateRecords', '/pages/home/heart_rate_detail');
-        this.detailedRecords = this.sampleRecords;
       }
     },
     initChart() {

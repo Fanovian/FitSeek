@@ -20,9 +20,7 @@
       <view class="chart-x-axis">
         <text v-for="(cat, idx) in chartData.categories" :key="idx" class="x-label">{{ cat }}</text>
       </view>
-      <view class="chart-y-axis">
-        <text>锻炼时长(分钟)</text>
-      </view>
+      <view class="chart-y-axis"><!-- 删除纵坐标标识 --></view>
     </view>
     <view class="record-list">
       <view v-for="(item, index) in detailedRecords" :key="index" class="record-item">
@@ -46,17 +44,6 @@ export default {
       screenWidth,
       svgHeight: Math.max(160, Math.floor(screenWidth * 0.45)),
       chartData: { categories: [], series: [] },
-      sampleRecords: [
-        { date: '2023-09-01', duration: '45', change: '+5min', type: 'aerobic' },
-        { date: '2023-08-31', duration: '40', change: '+2min', type: 'anaerobic' },
-        { date: '2023-08-30', duration: '38', change: '-1min', type: 'streching' },
-        { date: '2023-08-29', duration: '39', change: '+3min', type: 'aerobic' },
-        { date: '2023-08-28', duration: '36', change: '-2min', type: 'other' },
-        { date: '2023-08-27', duration: '38', change: '+1min', type: 'aerobic' },
-        { date: '2023-08-26', duration: '37', change: '-1min', type: 'anaerobic' },
-        { date: '2023-08-25', duration: '38', change: '+2min', type: 'streching' },
-        { date: '2023-08-24', duration: '36', change: '-2min', type: 'other' },
-      ]
     };
   },
   computed: {
@@ -87,11 +74,11 @@ export default {
         if (res[1] && res[1].data && Array.isArray(res[1].data.records) && res[1].data.records.length) {
           this.detailedRecords = res[1].data.records;
         } else {
-          this.detailedRecords = this.sampleRecords;
+          this.detailedRecords = [];
         }
       } catch (e) {
         errorReport(e, 'fetchTrainingRecords', '/pages/home/training_detail');
-        this.detailedRecords = this.sampleRecords;
+        this.detailedRecords = [];
       }
     },
     initChart() {

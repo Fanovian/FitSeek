@@ -3,8 +3,8 @@
     <!-- 顶部信息栏 -->
     <view class="top-section">
       <view class="target-info">
-        <text class="label">距离目标</text>
-        <text class="value">{{ distanceToGoal }}kg</text>
+        <text class="label">距离<br>目标</text>
+        <text class="value">{{ distanceToGoal }}</text>
       </view>
       
       <view class="current-weight">
@@ -17,7 +17,7 @@
         <text class="value">{{ currentBMI }}</text>
       </view>
     </view>
-    
+
     <!-- 添加健康记录按钮 -->
     <AddHealthRecordForm @record-added="handleRecordAdded" />
 
@@ -29,23 +29,23 @@
     >
       <view class="card-list">
         <!-- 公告和文章卡片 -->
-        <AnnouncementCard :announcements="announcementList.length ? announcementList : sampleAnnouncementList" @click="goToAnnouncementList" />
-        <ArticleCard :articles="articleList.length ? articleList : sampleArticleList" @click="goToArticleList" />
+        <AnnouncementCard :announcements="announcementList" @click="goToAnnouncementList" />
+        <ArticleCard :articles="articleList" @click="goToArticleList" />
         <!-- 血氧记录 -->
-        <BloodOxygenCard :records="bloodOxygenRecords.length ? bloodOxygenRecords : sampleBloodOxygenRecords" />
+        <BloodOxygenCard :records="bloodOxygenRecords" />
         <!-- 心率记录 -->
-        <HeartRateCard :records="heartRateRecords.length ? heartRateRecords : sampleHeartRateRecords" />
+        <HeartRateCard :records="heartRateRecords" />
         <!-- 体重记录 -->
         <WeightCard 
-          :records="weightRecords.length ? weightRecords : sampleWeightRecords"
+          :records="weightRecords"
         />
         <!-- 体脂记录 -->
         <BodyFatCard 
-          :records="bodyFatRecords.length ? bodyFatRecords : sampleBodyFatRecords"
+          :records="bodyFatRecords"
         />
         <!-- 锻炼记录 -->
         <TrainingCard 
-          :records="trainingRecords.length ? trainingRecords : sampleTrainingRecords"
+          :records="trainingRecords"
         />
       </view>
     </scroll-view>
@@ -82,96 +82,11 @@ export default {  components: {
       heartRateRecords: [],
       announcementList: [],
       articleList: [],
-      // 示例数据
-      sampleWeightRecords: [
-        { date: '2023-09-09', value: '64.8kg', change: '-0.2kg' },
-        { date: '2023-09-08', value: '65.0kg', change: '+0.3kg' },
-        { date: '2023-09-07', value: '64.7kg', change: '-0.2kg' },
-        { date: '2023-09-06', value: '64.9kg', change: '+0.3kg' },
-        { date: '2023-09-05', value: '64.6kg', change: '-0.2kg' },
-        { date: '2023-09-04', value: '64.8kg', change: '+0.3kg' },
-        { date: '2023-09-03', value: '64.5kg', change: '-0.2kg' },
-        { date: '2023-09-02', value: '64.7kg', change: '-0.3kg' },
-        { date: '2023-09-01', value: '65.0kg', change: '+0.3kg' },
-      ],
-      sampleBodyFatRecords: [
-        { date: '2023-09-09', value: '22.1%', change: '-0.1%' },
-        { date: '2023-09-08', value: '22.2%', change: '+0.2%' },
-        { date: '2023-09-07', value: '22.0%', change: '-0.3%' },
-        { date: '2023-09-06', value: '22.3%', change: '+0.2%' },
-        { date: '2023-09-05', value: '22.1%', change: '-0.1%' },
-        { date: '2023-09-04', value: '22.2%', change: '+0.2%' },
-        { date: '2023-09-03', value: '22.0%', change: '-0.3%' },
-        { date: '2023-09-02', value: '22.3%', change: '+0.2%' },
-        { date: '2023-09-01', value: '22.1%', change: '-0.5%' },
-      ],
-      sampleTrainingRecords: [
-        { date: '2023-09-09', duration: '80min', change: '+5min', type: 'aerobic' },
-        { date: '2023-09-08', duration: '75min', change: '+5min', type: 'anaerobic' },
-        { date: '2023-09-07', duration: '70min', change: '+5min', type: 'streching' },
-        { date: '2023-09-06', duration: '65min', change: '+5min', type: 'other' },
-        { date: '2023-09-05', duration: '60min', change: '+5min', type: 'aerobic' },
-        { date: '2023-09-04', duration: '55min', change: '+5min', type: 'anaerobic' },
-        { date: '2023-09-03', duration: '50min', change: '+10min', type: 'streching' },
-        { date: '2023-09-02', duration: '40min', change: '-5min', type: 'other' },
-        { date: '2023-09-01', duration: '45min', change: '+5min', type: 'aerobic' },
-      ],
-      sampleBloodOxygenRecords: [
-        { time: '2025-06-04 09:00', value: '98.2', change: '+0.2%' },
-        { time: '2025-06-04 08:00', value: '98.0', change: '+0.1%' },
-        { time: '2025-06-04 07:00', value: '97.9', change: '-0.1%' },
-        { time: '2025-06-04 06:00', value: '98.0', change: '+0.2%' },
-        { time: '2025-06-04 05:00', value: '97.8', change: '-0.2%' },
-        { time: '2025-06-04 04:00', value: '98.0', change: '+0.1%' },
-        { time: '2025-06-04 03:00', value: '97.9', change: '-0.1%' },
-        { time: '2025-06-04 02:00', value: '98.0', change: '+0.1%' },
-        { time: '2025-06-04 01:00', value: '97.9', change: '-0.1%' },
-      ],
-      sampleHeartRateRecords: [
-        { time: '2025-06-04 09:00', value: '72', change: '+2bpm' },
-        { time: '2025-06-04 08:00', value: '70', change: '+1bpm' },
-        { time: '2025-06-04 07:00', value: '69', change: '-1bpm' },
-        { time: '2025-06-04 06:00', value: '70', change: '+2bpm' },
-        { time: '2025-06-04 05:00', value: '68', change: '-2bpm' },
-        { time: '2025-06-04 04:00', value: '70', change: '+1bpm' },
-        { time: '2025-06-04 03:00', value: '69', change: '-1bpm' },
-        { time: '2025-06-04 02:00', value: '70', change: '+1bpm' },
-        { time: '2025-06-04 01:00', value: '69', change: '-1bpm' },
-      ],
       currentWeight: '--',
       currentBMI: '--',
       height: null, // 动态获取
       targetWeight: null, // 动态获取
       distanceToGoal: '--', // 新增
-      sampleAnnouncementList: [
-        {
-          _id: '1',
-          publisher_name: 'fitseek-admin',
-          content: '# 端午节放假通知\n\n亲爱的用户：\n\n端午节将至，FitSeek团队祝大家节日安康！6月8日至6月10日平台服务正常，欢迎随时记录健康数据。',
-          publish_time: '2025-06-03T09:07:36.862Z'
-        },
-        {
-          _id: '2',
-          publisher_name: 'fitseek-admin',
-          content: '## 新功能上线\n\n- 支持心率、血氧趋势图\n- 训练记录可选类型\n- 文章/公告支持Markdown格式',
-          publish_time: '2025-05-28T10:12:00.000Z'
-        }
-      ],
-      sampleArticleList: [
-        {
-          _id: 'a1',
-          publisher_name: 'fitseek-admin',
-          content: '# 健康饮食小贴士\n\n1. 多吃蔬菜水果\n2. 控制油盐糖摄入\n3. 合理搭配主食和蛋白质\n\n',
-          // content: '# 健康饮食小贴士\n\n1. 多吃蔬菜水果\n2. 控制油盐糖摄入\n3. 合理搭配主食和蛋白质\n\n```js\n// 示例代码块\n__f__(\'log\',\'at pages/home/index.vue:161\',\'Eat healthy!\')\n```',
-		  publish_time: '2025-06-01T08:44:58.455Z'
-        },
-        {
-          _id: 'a2',
-          publisher_name: 'fitseek-admin',
-          content: '## 科学锻炼建议\n\n- 每周至少150分钟有氧运动\n- 力量训练每周2次\n- 运动前后注意拉伸',
-          publish_time: '2025-05-25T15:30:00.000Z'
-        }
-      ],
     };
   },  methods: {
     // 处理健康记录添加后的刷新
@@ -220,13 +135,13 @@ export default {  components: {
               }
               return { date: r.time.slice(0, 10), value, change };
             });
-          this.weightRecords = records.length ? records : this.sampleWeightRecords;
+          this.weightRecords = records;
         } else {
-          this.weightRecords = this.sampleWeightRecords;
+          this.weightRecords = [];
         }
       } catch (e) {
         errorReport(e, 'fetchWeightRecords', '/pages/home/index');
-        this.weightRecords = this.sampleWeightRecords;
+        this.weightRecords = [];
       }
     },
     // 获取体脂记录
@@ -255,13 +170,13 @@ export default {  components: {
               }
               return { date: r.time.slice(0, 10), value, change };
             });
-          this.bodyFatRecords = records.length ? records : this.sampleBodyFatRecords;
+          this.bodyFatRecords = records;
         } else {
-          this.bodyFatRecords = this.sampleBodyFatRecords;
+          this.bodyFatRecords = [];
         }
       } catch (e) {
         errorReport(e, 'fetchBodyFatRecords', '/pages/home/index');
-        this.bodyFatRecords = this.sampleBodyFatRecords;
+        this.bodyFatRecords = [];
       }
     },
     // 获取锻炼记录
@@ -295,13 +210,13 @@ export default {  components: {
                 content: r.content || ''
               };
             });
-          this.trainingRecords = records.length ? records : this.sampleTrainingRecords;
+          this.trainingRecords = records;
         } else {
-          this.trainingRecords = this.sampleTrainingRecords;
+          this.trainingRecords = [];
         }
       } catch (e) {
         errorReport(e, 'fetchTrainingRecords', '/pages/home/index');
-        this.trainingRecords = this.sampleTrainingRecords;
+        this.trainingRecords = [];
       }
     },
     // 获取血氧记录
@@ -333,13 +248,13 @@ export default {  components: {
                 change
               };
             });
-          this.bloodOxygenRecords = records.length ? records : this.sampleBloodOxygenRecords;
+          this.bloodOxygenRecords = records;
         } else {
-          this.bloodOxygenRecords = this.sampleBloodOxygenRecords;
+          this.bloodOxygenRecords = [];
         }
       } catch (e) {
         errorReport(e, 'fetchBloodOxygenRecords', '/pages/home/index');
-        this.bloodOxygenRecords = this.sampleBloodOxygenRecords;
+        this.bloodOxygenRecords = [];
       }
     },
     // 获取心率记录
@@ -371,13 +286,13 @@ export default {  components: {
                 change
               };
             });
-          this.heartRateRecords = records.length ? records : this.sampleHeartRateRecords;
+          this.heartRateRecords = records;
         } else {
-          this.heartRateRecords = this.sampleHeartRateRecords;
+          this.heartRateRecords = [];
         }
       } catch (e) {
         errorReport(e, 'fetchHeartRateRecords', '/pages/home/index');
-        this.heartRateRecords = this.sampleHeartRateRecords;
+        this.heartRateRecords = [];
       }
     },
     // 获取公告
@@ -388,10 +303,10 @@ export default {  components: {
           method: 'GET',
           header: { 'Content-Type': 'application/json' }
         });
-        this.announcementList = (res.data.announcements && res.data.announcements.length) ? res.data.announcements : this.sampleAnnouncementList;
+        this.announcementList = (res.data.announcements && res.data.announcements.length) ? res.data.announcements : [];
       } catch (e) {
         errorReport(e, 'fetchAnnouncements', '/pages/home/index');
-        this.announcementList = this.sampleAnnouncementList;
+        this.announcementList = [];
       }
     },
     // 获取文章
@@ -402,10 +317,10 @@ export default {  components: {
           method: 'GET',
           header: { 'Content-Type': 'application/json' }
         });
-        this.articleList = (res.data.articles && res.data.articles.length) ? res.data.articles : this.sampleArticleList;
+        this.articleList = (res.data.articles && res.data.articles.length) ? res.data.articles : [];
       } catch (e) {
         errorReport(e, 'fetchArticles', '/pages/home/index');
-        this.articleList = this.sampleArticleList;
+        this.articleList = [];
       }
     },
     // 获取用户资料（身高和目标体重）
@@ -502,6 +417,7 @@ export default {  components: {
   height: 100vh;
   /* 移除 overflow 和 padding，避免影响 sticky */
   background-color: #f5f5f5;
+  position: relative; /* 新增，作为绝对定位的参考 */
 }
 
 /* 顶部信息栏样式 */
@@ -544,14 +460,30 @@ export default {  components: {
   margin-left: 10px;
 }
 
+/* 添加健康记录按钮样式 */
+.add-record-btn-wrapper {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 320rpx; /* 距顶部信息栏底部约80rpx，略高于原来 */
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto;
+  /* 增加阴影和圆角提升悬浮感 */
+  box-shadow: 0 8rpx 32rpx rgba(56,142,60,0.12);
+  border-radius: 32rpx;
+}
+
 /* 数据卡片容器 */
 .card-container {
   flex: 1;
   background: linear-gradient(to bottom, #ffffff, #ffffff);
-  padding: 20rpx; /* 移到这里 */
+  padding: 20rpx;
   box-sizing: border-box;
   overflow-y: scroll;
-  padding-bottom: 140rpx; /* 为底部按钮留出空间 */
+  padding-bottom: 0; /* 去除底部多余空白 */
 }
 
 .card-list {

@@ -17,9 +17,7 @@
         <text v-else-if="trend < 0" class="negative">总体趋势：{{ trend }}%</text>
         <text v-else>总体趋势：无变化</text>
       </view>
-      <view class="chart-x-axis">
-        <text v-for="(cat, idx) in chartData.categories" :key="idx" class="x-label">{{ cat }}</text>
-      </view>
+      <!-- 不再显示纵坐标标识view -->
     </view>
     <view class="record-list">
       <view v-for="(item, index) in detailedRecords" :key="index" class="record-item">
@@ -45,17 +43,6 @@ export default {
       screenWidth,
       svgHeight: Math.max(160, Math.floor(screenWidth * 0.45)),
       chartData: { categories: [], series: [] },
-      sampleRecords: [
-        { date: '2023-09-09', value: '22.1', change: '-0.1%' },
-        { date: '2023-09-08', value: '22.2', change: '+0.2%' },
-        { date: '2023-09-07', value: '22.0', change: '-0.3%' },
-        { date: '2023-09-06', value: '22.3', change: '+0.2%' },
-        { date: '2023-09-05', value: '22.1', change: '-0.1%' },
-        { date: '2023-09-04', value: '22.2', change: '+0.2%' },
-        { date: '2023-09-03', value: '22.0', change: '-0.3%' },
-        { date: '2023-09-02', value: '22.3', change: '+0.2%' },
-        { date: '2023-09-01', value: '22.1', change: '-0.5%' },
-      ]
     };
   },
   computed: {
@@ -99,13 +86,13 @@ export default {
                 change
               };
             });
-          this.detailedRecords = records.length ? records : this.sampleRecords;
+          this.detailedRecords = records;
         } else {
-          this.detailedRecords = this.sampleRecords;
+          this.detailedRecords = [];
         }
       } catch (e) {
         errorReport(e, 'fetchBodyFatRecords', '/pages/home/body_fat_detail');
-        this.detailedRecords = this.sampleRecords;
+        this.detailedRecords = [];
       }
     },
     initChart() {

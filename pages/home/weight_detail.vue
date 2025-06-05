@@ -20,9 +20,7 @@
       <view class="chart-x-axis">
         <text v-for="(cat, idx) in chartData.categories" :key="idx" class="x-label">{{ cat }}</text>
       </view>
-      <view class="chart-y-axis">
-        <text>体重(kg)</text>
-      </view>
+      <view class="chart-y-axis"><!-- 删除纵坐标标识 --></view>
     </view>
     <view class="record-list">
       <view v-for="(item, index) in detailedRecords" :key="index" class="record-item">
@@ -48,17 +46,6 @@ export default {
       screenWidth,
       svgHeight: Math.max(160, Math.floor(screenWidth * 0.45)),
       chartData: { categories: [], series: [] },
-      sampleRecords: [
-        { date: '2023-09-09', value: '64.8', change: '-0.2kg' },
-        { date: '2023-09-08', value: '65.0', change: '+0.3kg' },
-        { date: '2023-09-07', value: '64.7', change: '-0.2kg' },
-        { date: '2023-09-06', value: '64.9', change: '+0.3kg' },
-        { date: '2023-09-05', value: '64.6', change: '-0.2kg' },
-        { date: '2023-09-04', value: '64.8', change: '+0.3kg' },
-        { date: '2023-09-03', value: '64.5', change: '-0.2kg' },
-        { date: '2023-09-02', value: '64.7', change: '-0.3kg' },
-        { date: '2023-09-01', value: '65.0', change: '+0.3kg' },
-      ]
     };
   },
   computed: {
@@ -102,13 +89,13 @@ export default {
                 change
               };
             });
-          this.detailedRecords = records.length ? records : this.sampleRecords;
+          this.detailedRecords = records;
         } else {
-          this.detailedRecords = this.sampleRecords;
+          this.detailedRecords = [];
         }
       } catch (e) {
         errorReport(e, 'fetchWeightRecords', '/pages/home/weight_detail');
-        this.detailedRecords = this.sampleRecords;
+        this.detailedRecords = [];
       }
     },
     initChart() {
