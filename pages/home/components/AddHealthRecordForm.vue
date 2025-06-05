@@ -159,7 +159,7 @@ export default {
 .health-record-form {
   position: fixed;
   bottom: 30rpx;
-  right: 30rpx;
+  left: 30rpx;
   z-index: 100;
 }
 
@@ -174,7 +174,6 @@ export default {
   align-items: center;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
-  margin-left: auto;
 }
 
 .add-button.button-active {
@@ -201,7 +200,7 @@ export default {
 .form-container {
   position: absolute;
   bottom: 120rpx;
-  right: 0;
+  left: 0;
   width: 600rpx;
   background-color: white;
   border-radius: 12rpx;
@@ -256,8 +255,9 @@ export default {
 
 .input-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 20rpx;
+  align-items: center;
 }
 
 .input-group {
@@ -267,6 +267,7 @@ export default {
   border-radius: 8rpx;
   padding: 0 20rpx;
   height: 80rpx;
+  flex: 1;
 }
 
 .record-input {
@@ -290,6 +291,9 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 0 30rpx;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .submit-button[disabled] {

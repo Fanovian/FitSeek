@@ -197,6 +197,7 @@ export default {  components: {
     async fetchWeightRecords() {
       try {
         const token = uni.getStorageSync('jwtToken');
+        console.log('Fetching weight records with token:', token);
         const res = await uni.request({
           url: 'https://api.fanovian.cc:3000/api/fitness/get',
           method: 'GET',
