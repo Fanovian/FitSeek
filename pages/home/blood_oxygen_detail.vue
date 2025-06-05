@@ -2,48 +2,25 @@
   <view class="detail-container">
     <view class="chart-container">
       <text>血氧变化趋势图表</text>
-      <scroll-view scroll-x class="simple-line-chart-scroll">
-        <view
-          class="simple-line-chart"
-          :style="{ width: svgScrollWidth + 'px', height: svgHeight + 'px' }"
-        >
-          <svg
-            v-if="chartPoints.length > 1"
-            :width="svgScrollWidth"
-            :height="svgHeight"
-          >
-            <polyline
-              :points="chartPointsStr"
-              fill="none"
-              stroke="#1976d2"
-              stroke-width="3"
-            />
-            <circle
-              v-for="(pt, idx) in chartPoints"
-              :key="idx"
-              :cx="pt[0]"
-              :cy="pt[1]"
-              r="5"
-              fill="#1976d2"
-            />
-          </svg>
-          <view v-else style="color: #aaa; text-align: center; padding: 30rpx;">暂无足够数据</view>
-          <view class="chart-x-labels" v-if="chartPoints.length > 1" :style="{ width: svgScrollWidth + 'px' }">
-            <view
-              v-for="(item, idx) in detailedRecords"
-              :key="idx"
-              class="chart-x-label"
-              :style="{ left: (chartPoints[idx]?.[0] || 0) + 'px', width: labelWidth + 'px' }"
-            >
-              {{ item.time.slice(5, 16) }}
-            </view>
-          </view>
-        </view>
-      </scroll-view>
+      <qiun-data-charts
+        type="line"
+        :opts="{ color: ['#4CAF50'], legend: false, xAxis: { disableGrid: true }, yAxis: { min: null, gridType: 'dash', splitNumber: 4 }, extra: { line: { type: 'curve', width: 3 } } }"
+        :chartData="chartData"
+        :canvas2d="false"
+        :ontouch="false"
+        :width="screenWidth"
+        :height="svgHeight"
+      />
       <view class="trend">
         <text v-if="trend > 0" class="positive">总体趋势：+{{ trend }}%</text>
         <text v-else-if="trend < 0" class="negative">总体趋势：{{ trend }}%</text>
         <text v-else>总体趋势：无变化</text>
+      </view>
+      <view class="chart-x-axis">
+        <text v-for="(cat, idx) in chartData.categories" :key="idx" class="x-label">{{ cat }}</text>
+      </view>
+      <view class="chart-y-axis">
+        <text>血氧(%)</text>
       </view>
     </view>
     <view class="record-list">
@@ -58,7 +35,9 @@
 </template>
 
 <script>
+import QiunDataCharts from '@/uni_modules/qiun-data-charts/components/qiun-data-charts/qiun-data-charts.vue';
 export default {
+  components: { 'qiun-data-charts': QiunDataCharts },
   props: {
     data: {
       type: String,
@@ -68,15 +47,20 @@ export default {
   data() {
     const sysInfo = uni.getSystemInfoSync();
     const screenWidth = sysInfo.windowWidth || 375;
-    const basePadding = 16;
     return {
       detailedRecords: [],
       screenWidth,
-      svgWidth: 0,
       svgHeight: Math.max(160, Math.floor(screenWidth * 0.45)),
-      svgScrollWidth: 0,
-      labelWidth: 80,
-      basePadding,
+      chartData: { categories: [], series: [] },
+      chartOpts: {
+        color: ['#1976d2'],
+        padding: [15, 10, 0, 10],
+        enableScroll: true,
+        legend: false,
+        xAxis: { disableGrid: true },
+        yAxis: { min: null, gridType: 'dash', splitNumber: 4 },
+        extra: { line: { type: 'curve', width: 3, activeType: 'hollow' } }
+      }
     };
   },
   computed: {
@@ -85,48 +69,94 @@ export default {
       const first = parseFloat(this.detailedRecords[0].value);
       const last = parseFloat(this.detailedRecords[this.detailedRecords.length - 1].value);
       return (last - first).toFixed(2);
-    },
-    chartPoints() {
-      if (!this.detailedRecords.length) return [];
-      const n = this.detailedRecords.length;
-      const minGap = this.labelWidth + 8;
-      const maxGap = (this.screenWidth - this.basePadding * 2) / Math.max(n - 1, 1);
-      const gap = Math.max(minGap, Math.min(maxGap, 80));
-      this.svgWidth = gap;
-      const w = gap * (n - 1) || gap;
-      const h = this.svgHeight;
-      const yArr = this.detailedRecords.map(item => parseFloat(item.value));
-      const minY = Math.min(...yArr), maxY = Math.max(...yArr);
-      const rangeY = maxY - minY || 1;
-      const paddingTop = 24;
-      const paddingBottom = 28;
-      const chartHeight = h - paddingTop - paddingBottom;
-      this.$data.svgScrollWidth = Math.max(w + this.basePadding * 2, this.screenWidth);
-      return yArr.map((y, i) => [
-        gap * i + this.basePadding,
-        paddingTop + ((maxY - y) / rangeY) * chartHeight
-      ]);
-    },
-    chartPointsStr() {
-      return this.chartPoints.map(pt => pt.join(',')).join(' ');
     }
   },
-  created() {
+  async created() {
     if (this.data) {
       this.detailedRecords = JSON.parse(decodeURIComponent(this.data));
     } else {
-      // 示例数据，精确到小时
-      this.detailedRecords = [
-        { time: '2025-06-04 09:00', value: '98.2', change: '+0.2%' },
-        { time: '2025-06-04 08:00', value: '98.0', change: '+0.1%' },
-        { time: '2025-06-04 07:00', value: '97.9', change: '-0.1%' },
-        { time: '2025-06-04 06:00', value: '98.0', change: '+0.2%' },
-        { time: '2025-06-04 05:00', value: '97.8', change: '-0.2%' },
-        { time: '2025-06-04 04:00', value: '98.0', change: '+0.1%' },
-        { time: '2025-06-04 03:00', value: '97.9', change: '-0.1%' },
-        { time: '2025-06-04 02:00', value: '98.0', change: '+0.1%' },
-        { time: '2025-06-04 01:00', value: '97.9', change: '-0.1%' },
-      ];
+      try {
+        const token = uni.getStorageSync('jwtToken');
+        const res = await uni.request({
+          url: 'https://api.fanovian.cc:3000/api/fitness/get',
+          method: 'GET',
+          header: {
+            Authorization: token ? 'Bearer ' + token : ''
+          }
+        });
+        if (res.data && res.data.success) {
+          const records = (res.data.records || []).filter(r => r.type === 'blood_oxygen')
+            .sort((a, b) => new Date(b.time) - new Date(a.time))
+            .map((r, i, arr) => {
+              let change = '';
+              if (i < arr.length - 1) {
+                const diff = (r.value - arr[i + 1].value).toFixed(1);
+                change = (diff > 0 ? '+' : '') + diff + '%';
+              } else {
+                change = '--';
+              }
+              return {
+                time: r.time.replace('T', ' ').slice(0, 16),
+                value: r.value.toFixed(1),
+                change
+              };
+            });
+          this.detailedRecords = records.length ? records : [
+            { time: '2025-06-04 09:00', value: '98.2', change: '+0.2%' },
+            { time: '2025-06-04 08:00', value: '98.0', change: '+0.1%' },
+            { time: '2025-06-04 07:00', value: '97.9', change: '-0.1%' },
+            { time: '2025-06-04 06:00', value: '98.0', change: '+0.2%' },
+            { time: '2025-06-04 05:00', value: '97.8', change: '-0.2%' },
+            { time: '2025-06-04 04:00', value: '98.0', change: '+0.1%' },
+            { time: '2025-06-04 03:00', value: '97.9', change: '-0.1%' },
+            { time: '2025-06-04 02:00', value: '98.0', change: '+0.1%' },
+            { time: '2025-06-04 01:00', value: '97.9', change: '-0.1%' },
+          ];
+        } else {
+          this.detailedRecords = [
+            { time: '2025-06-04 09:00', value: '98.2', change: '+0.2%' },
+            { time: '2025-06-04 08:00', value: '98.0', change: '+0.1%' },
+            { time: '2025-06-04 07:00', value: '97.9', change: '-0.1%' },
+            { time: '2025-06-04 06:00', value: '98.0', change: '+0.2%' },
+            { time: '2025-06-04 05:00', value: '97.8', change: '-0.2%' },
+            { time: '2025-06-04 04:00', value: '98.0', change: '+0.1%' },
+            { time: '2025-06-04 03:00', value: '97.9', change: '-0.1%' },
+            { time: '2025-06-04 02:00', value: '98.0', change: '+0.1%' },
+            { time: '2025-06-04 01:00', value: '97.9', change: '-0.1%' },
+          ];
+        }
+      } catch (e) {
+        this.detailedRecords = [
+          { time: '2025-06-04 09:00', value: '98.2', change: '+0.2%' },
+          { time: '2025-06-04 08:00', value: '98.0', change: '+0.1%' },
+          { time: '2025-06-04 07:00', value: '97.9', change: '-0.1%' },
+          { time: '2025-06-04 06:00', value: '98.0', change: '+0.2%' },
+          { time: '2025-06-04 05:00', value: '97.8', change: '-0.2%' },
+          { time: '2025-06-04 04:00', value: '98.0', change: '+0.1%' },
+          { time: '2025-06-04 03:00', value: '97.9', change: '-0.1%' },
+          { time: '2025-06-04 02:00', value: '98.0', change: '+0.1%' },
+          { time: '2025-06-04 01:00', value: '97.9', change: '-0.1%' },
+        ];
+      }
+    }
+    await this.$nextTick();
+    this.initChart();
+  },
+  methods: {
+    initChart() {
+      // 横轴仅显示日期，纵轴为血氧
+      const categories = this.detailedRecords.map(item => {
+        if (item.time) {
+          const d = item.time.split(' ')[0];
+          return d.length === 10 ? d.slice(5) : item.time;
+        }
+        return '';
+      });
+      const data = this.detailedRecords.map(item => parseFloat(item.value) || 0);
+      this.chartData = {
+        categories,
+        series: [{ name: '血氧', data }]
+      };
     }
   }
 };
@@ -144,15 +174,6 @@ export default {
   justify-content: center;
   align-items: center;
   margin-bottom: 20rpx;
-}
-.simple-line-chart-scroll {
-  width: 100vw;
-  overflow-x: auto;
-}
-.simple-line-chart {
-  position: relative;
-  height: 220px;
-  min-width: 100vw;
 }
 .trend {
   margin-top: 10rpx;
@@ -173,23 +194,22 @@ export default {
 .negative {
   color: #F44336;
 }
-.chart-x-labels {
+.chart-x-axis {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding-top: 10rpx;
+}
+.x-label {
+  font-size: 24rpx;
+}
+.chart-y-axis {
   position: absolute;
   left: 0;
-  top: 200px;
-  width: 100%;
-  height: 20px;
-  pointer-events: none;
-}
-.chart-x-label {
-  position: absolute;
-  top: 0;
-  text-align: center;
-  font-size: 18rpx;
-  color: #888;
-  transform: translateX(-50%);
-  min-width: 60px;
-  max-width: 100px;
-  white-space: nowrap;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 </style>

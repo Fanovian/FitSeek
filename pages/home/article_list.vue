@@ -26,7 +26,7 @@ export default {
               {
                 _id: 'a1',
                 publisher_name: 'fitseek-admin',
-                content: '# 健康饮食小贴士\n\n1. 多吃蔬菜水果\n2. 控制油盐糖摄入\n3. 合理搭配主食和蛋白质\n\n```js\n// 示例代码块\nconsole.log(\'Eat healthy!\')\n```',
+                content: '# 健康饮食小贴士\n\n1. 多吃蔬菜水果\n2. 控制油盐糖摄入\n3. 合理搭配主食和蛋白质\n\n',
                 publish_time: today.getFullYear() + '-06-01T08:44:58.455Z'
               },
               {
