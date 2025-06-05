@@ -1,6 +1,14 @@
 {
 	"pages": [
 	  {
+		"path": "pages/splash/index",
+		"style": {
+		  "navigationBarTitleText": "开屏",
+		  "navigationStyle": "custom",
+		  "backgroundColor": "#ffffff"
+		}
+	  },
+	  {
 		"path": "pages/login/index",
 		"style": {
 		"navigationBarTitleText": "登录",
@@ -101,7 +109,10 @@
 	],
 	"globalStyle": {
 	  "backgroundColor": "#f0fff0",
-	  "navigationStyle": "default"
+	  "navigationStyle": "default",
+	  "rpxCalcMaxDeviceWidth": 750,
+	  "rpxCalcBaseDeviceWidth": 375,
+	  "onLaunch": "/pages/splash/index"
 	},
 	"tabBar": {
 	  "color": "#666",
