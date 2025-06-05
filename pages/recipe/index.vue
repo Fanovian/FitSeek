@@ -128,6 +128,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.page, .container, .main {
+  padding-top: env(safe-area-inset-top);
+}
+
 .container {
   padding-bottom: 30rpx;
   background-color: #f9f9f9;

@@ -1,5 +1,6 @@
 <!-- pages/home/index.vue -->
-<template>  <view class="container">
+<template>
+  <view class="container">
     <!-- 顶部信息栏 -->
     <view class="top-section">
       <view class="target-info">
@@ -31,10 +32,6 @@
         <!-- 公告和文章卡片 -->
         <AnnouncementCard :announcements="announcementList" @click="goToAnnouncementList" />
         <ArticleCard :articles="articleList" @click="goToArticleList" />
-        <!-- 血氧记录 -->
-        <BloodOxygenCard :records="bloodOxygenRecords" />
-        <!-- 心率记录 -->
-        <HeartRateCard :records="heartRateRecords" />
         <!-- 体重记录 -->
         <WeightCard 
           :records="weightRecords"
@@ -43,10 +40,15 @@
         <BodyFatCard 
           :records="bodyFatRecords"
         />
+        <!-- 血氧记录 -->
+        <BloodOxygenCard :records="bloodOxygenRecords" />
+        <!-- 心率记录 -->
+        <HeartRateCard :records="heartRateRecords" />
+
         <!-- 锻炼记录 -->
-        <TrainingCard 
+        <!-- <TrainingCard 
           :records="trainingRecords"
-        />
+        /> -->
       </view>
     </scroll-view>
   </view>
@@ -63,7 +65,8 @@ import ArticleCard from '@/pages/home/components/ArticleCard.vue';
 import AddHealthRecordForm from '@/pages/home/components/AddHealthRecordForm.vue';
 import errorReport from '@/utils/errorReport.js';
 
-export default {  components: {
+export default {
+  components: {
     WeightCard,
     BodyFatCard,
     TrainingCard,
@@ -88,7 +91,8 @@ export default {  components: {
       targetWeight: null, // 动态获取
       distanceToGoal: '--', // 新增
     };
-  },  methods: {
+  },
+  methods: {
     // 处理健康记录添加后的刷新
     handleRecordAdded(type) {
       // 根据添加的记录类型刷新对应的数据
@@ -416,20 +420,62 @@ export default {  components: {
   flex-direction: column;
   height: 100vh;
   /* 移除 overflow 和 padding，避免影响 sticky */
-  background-color: #f5f5f5;
+  background-color: #ffffff;
   position: relative; /* 新增，作为绝对定位的参考 */
+  padding: 0;
+  margin: 0;
+  padding-top: env(safe-area-inset-top); /* 适配手机安全区 */
 }
 
 /* 顶部信息栏样式 */
 .top-section {
+  width: 100vw;
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 20rpx 0;
   height: 400rpx;
-  background-color: #ffffff;
+  background-color: #3CB371; /* 使用绿色背景 */
   display: flex;
-  padding: 20rpx;
   box-sizing: border-box;
   position: sticky;
   top: 0;
   z-index: 10;
+  border-radius: 0;
+  box-shadow: 0 8rpx 32rpx rgba(56,142,60,0.10); /* 柔和阴影 */
+  /* 让内容不贴边 */
+  overflow: hidden;
+  padding-top: env(safe-area-inset-top); /* 安全区适配 */
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+  justify-content: center;
+  align-items: center;
+}
+
+.label {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-family: inherit;
+  line-height: 1.2;
+  text-align: center;
+  white-space: pre-line;
+}
+.value {
+  font-size: 32px;
+  font-weight: bold;
+  font-family: inherit;
+  text-align: center;
+}
+.current-weight .weight {
+  font-size: 44px;
+  font-weight: bold;
+  font-family: inherit;
+  text-align: center;
+}
+.current-weight .unit {
+  font-size: 18px;
+  font-family: inherit;
+  text-align: center;
 }
 
 .target-info, .bmi-info {
@@ -437,27 +483,21 @@ export default {  components: {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  color: #388e3c;
+  align-items: flex-end;
+  color: #ffffff;
+  text-align: center;
 }
-
+.bmi-info {
+  align-items: flex-start;
+}
 .current-weight {
-  flex: 4;
+  flex: 2;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: #388e3c;
-}
-
-.weight {
-  font-size: 48px;
-  font-weight: bold;
-}
-
-.unit {
-  font-size: 24px;
-  margin-left: 10px;
+  color: #ffffff;
+  text-align: center;
 }
 
 /* 添加健康记录按钮样式 */
@@ -465,7 +505,7 @@ export default {  components: {
   position: absolute;
   left: 0;
   right: 0;
-  top: 320rpx; /* 距顶部信息栏底部约80rpx，略高于原来 */
+  top: 320rpx; /* 约80rpx，略高于原来 */
   z-index: 20;
   display: flex;
   justify-content: center;
@@ -483,7 +523,8 @@ export default {  components: {
   padding: 20rpx;
   box-sizing: border-box;
   overflow-y: scroll;
-  padding-bottom: 0; /* 去除底部多余空白 */
+  padding-bottom: 0;
+  margin-top: 20rpx;
 }
 
 .card-list {

@@ -52,6 +52,7 @@ export default {
   .card-title {
     font-weight: bold;
     margin-bottom: 10rpx;
+    color: #2196F3;
   }
 
   .card-content {

@@ -119,6 +119,7 @@ export default {
 <style scoped>
 .detail-container {
   padding: 16rpx;
+  padding-top: env(safe-area-inset-top);
 }
 .chart-container {
   min-height: 320rpx;

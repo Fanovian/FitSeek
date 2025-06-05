@@ -12,5 +12,10 @@ export default {
 }
 </script>
 <style scoped>
-.container { padding: 30rpx; background: #fff; min-height: 100vh; }
+.container {
+  padding: 30rpx;
+  background: #fff;
+  min-height: 100vh;
+  padding-top: env(safe-area-inset-top);
+}
 </style>
