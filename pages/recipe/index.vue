@@ -12,22 +12,24 @@ const {
   calorieTarget, 
   mealHistory, 
   mealTypes, 
+  foodLibrary,
   todayCalorieIntake,
   fetchMealHistory, 
   addMealRecord, 
   deleteMealRecord,
   updateCalorieTarget,
-  formatDateDisplay
+  formatDateDisplay,
+  fetchFoodLibrary
 } = recipeStore;
 
 // 是否显示添加表单
 const showAddForm = ref(false);
 
 // 添加新的饮食记录
-const addMeal = (formData) => {
+const addMeal = async (formData) => {
   try {
     // 创建新记录并添加到store
-    addMealRecord(formData);
+    await addMealRecord(formData);
     
     // 关闭表单
     showAddForm.value = false;
@@ -37,20 +39,34 @@ const addMeal = (formData) => {
       icon: 'success'
     });
   } catch (error) {
+    uni.showToast({
+      title: '添加失败',
+      icon: 'error'
+    });
     errorReport(error, 'addMeal', '/pages/recipe/index');
   }
 };
 
 // 处理删除饮食记录
-const handleDeleteRecord = ({ date, id }) => {
+const handleDeleteRecord = async ({ date, id }) => {
   try {
-    if (deleteMealRecord(date, id)) {
+    const success = await deleteMealRecord(date, id);
+    if (success) {
       uni.showToast({
         title: '删除成功',
         icon: 'success'
       });
+    } else {
+      uni.showToast({
+        title: '删除失败',
+        icon: 'error'
+      });
     }
   } catch (error) {
+    uni.showToast({
+      title: '删除失败',
+      icon: 'error'
+    });
     errorReport(error, 'handleDeleteRecord', '/pages/recipe/index');
   }
 };
@@ -70,9 +86,10 @@ const handleUpdateTarget = (newTarget) => {
 };
 
 // 页面加载时获取数据
-onMounted(() => {
+onMounted(async () => {
   try {
-    fetchMealHistory();
+    await fetchMealHistory();
+    await fetchFoodLibrary();
   } catch (error) {
     errorReport(error, 'onMounted', '/pages/recipe/index');
   }
@@ -92,11 +109,11 @@ onMounted(() => {
     <view class="add-meal-section" v-if="!showAddForm">
       <button class="add-meal-btn" @click="showAddForm = true">+ 添加饮食记录</button>
     </view>
-    
-    <!-- 添加饮食记录表单 -->
+      <!-- 添加饮食记录表单 -->
     <meal-form 
       v-if="showAddForm"
       :meal-types="mealTypes"
+      :food-library="foodLibrary"
       @submit="addMeal"
       @cancel="showAddForm = false"
     />
