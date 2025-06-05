@@ -198,13 +198,17 @@ export default {
       }
     },
     initChart() {
-      // 横坐标（categories）按时间升序排列
+      // 横坐标（categories）按时间升序排列，统一为东八区北京时间（MM-DD）
       const sortedRecords = [...this.detailedRecords].sort((a, b) => {
-        const dateA = new Date(a.date || a.time);
-        const dateB = new Date(b.date || b.time);
-        return dateA - dateB;
+        // 统一用 getBeijingDate 处理
+        const dateA = this.getBeijingDate(a.originalTime || a.time || a.date);
+        const dateB = this.getBeijingDate(b.originalTime || b.time || b.date);
+        return dateA.localeCompare(dateB);
       });
-      const categories = sortedRecords.map(item => item.date && item.date.length === 10 ? item.date.slice(5) : (item.date || ''));
+      const categories = sortedRecords.map(item => {
+        const bjDate = this.getBeijingDate(item.originalTime || item.time || item.date);
+        return bjDate ? bjDate.slice(5) : '';
+      });
       const data = sortedRecords.map(item => parseFloat(item.value || 0));
       this.chartData = {
         categories,
