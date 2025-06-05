@@ -15,27 +15,7 @@ export default {
   props: { announcements: Array },
   computed: {
     previewList() {
-      // 优先展示最新2条，若不足2条则补充本地示例
-      let arr = (this.announcements || []).slice(0, 2);
-      if (arr.length < 2) {
-        const today = new Date();
-        const sample = [
-          {
-            _id: 'sample1',
-            publisher_name: 'fitseek-admin',
-            content: '# 端午节放假通知\n\n亲爱的用户：\n\n端午节将至，FitSeek团队祝大家节日安康！6月8日至6月10日平台服务正常，欢迎随时记录健康数据。',
-            publish_time: today.getFullYear() + '-06-03T09:07:36.862Z'
-          },
-          {
-            _id: 'sample2',
-            publisher_name: 'fitseek-admin',
-            content: '## 新功能上线\n\n- 支持心率、血氧趋势图\n- 训练记录可选类型\n- 文章/公告支持Markdown格式',
-            publish_time: today.getFullYear() + '-05-28T10:12:00.000Z'
-          }
-        ];
-        arr = arr.concat(sample.slice(0, 2 - arr.length));
-      }
-      return arr;
+      return this.announcements || [];
     }
   },
   methods: {

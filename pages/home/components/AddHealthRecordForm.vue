@@ -5,7 +5,7 @@
     <view class="add-button" @click="toggleForm" :class="{ 'button-active': isExpanded }">
       <view class="button-content">
         <text class="add-icon">{{ isExpanded ? '×' : '+' }}</text>
-        <text class="add-text" v-if="!isExpanded">添加健康记录</text>
+        <text class="add-text" v-if="false">添加健康记录</text>
       </view>
     </view>
     
@@ -28,7 +28,8 @@
         </view>
       </view>
       
-      <view class="input-container">
+      <view class="input-container-vertical">
+        <!-- 记录数据 -->
         <view class="input-group">
           <input 
             type="digit" 
@@ -38,7 +39,30 @@
           />
           <text class="input-unit">{{ getSelectedTypeUnit() }}</text>
         </view>
-        
+        <!-- 时间选择器（标准Date格式，简单实现） -->
+        <picker mode="date" :value="dateValue" @change="onDateChange">
+          <view class="input-group">
+            <view class="picker-display" :class="{ 'picker-placeholder': !dateValue }">
+              {{ dateValue ? dateValue : '选择日期' }}
+            </view>
+          </view>
+        </picker>
+        <picker mode="time" :value="timeValue" @change="onTimeChange">
+          <view class="input-group">
+            <view class="picker-display" :class="{ 'picker-placeholder': !timeValue }">
+              {{ timeValue ? timeValue : '选择时间' }}
+            </view>
+          </view>
+        </picker>
+        <!-- 备注输入 -->
+        <view class="input-group">
+          <input 
+            type="text" 
+            v-model="recordNote" 
+            class="record-input" 
+            placeholder="备注（可选）" 
+          />
+        </view>
         <button class="submit-button" @click="submitRecord" :disabled="!isValidInput">提交</button>
       </view>
     </view>
@@ -53,6 +77,10 @@ export default {
       isExpanded: false,
       selectedType: 'weight',
       recordValue: '',
+      recordTime: '', // 新增
+      recordNote: '', // 新增
+      dateValue: '',
+      timeValue: '',
       recordTypes: [
         { type: 'weight', name: '体重', icon: '/static/icons/home/weight.svg', unit: 'kg' },
         { type: 'body_fat', name: '体脂', icon: '/static/icons/home/body_fat.svg', unit: '%' },
@@ -76,6 +104,10 @@ export default {
     resetForm() {
       this.selectedType = 'weight';
       this.recordValue = '';
+      this.recordTime = '';
+      this.recordNote = '';
+      this.dateValue = '';
+      this.timeValue = '';
     },
     selectType(type) {
       this.selectedType = type;
@@ -87,23 +119,37 @@ export default {
     getSelectedTypeUnit() {
       const selected = this.recordTypes.find(item => item.type === this.selectedType);
       return selected ? selected.unit : '';
-    },    async submitRecord() {
+    },
+    onDateChange(e) {
+      this.dateValue = e.detail.value;
+      this.updateRecordTime();
+    },
+    onTimeChange(e) {
+      this.timeValue = e.detail.value;
+      this.updateRecordTime();
+    },
+    updateRecordTime() {
+      if (this.dateValue && this.timeValue) {
+        // 组装成 JS 标准 Date 字符串
+        this.recordTime = this.dateValue + 'T' + this.timeValue + ':00';
+      } else {
+        this.recordTime = '';
+      }
+    },
+    async submitRecord() {
       if (!this.isValidInput) return;
-      
       try {
         const token = uni.getStorageSync('jwtToken');
         if (!token) {
-          uni.showToast({
-            title: '请先登录',
-            icon: 'none'
-          });
+          uni.showToast({ title: '请先登录', icon: 'none' });
           return;
         }
-        
         // 构建请求数据
         const requestData = {
           type: this.selectedType,
-          value: Number(this.recordValue)
+          value: Number(this.recordValue),
+          time: this.recordTime ? new Date(this.recordTime) : undefined,
+          note: this.recordNote || undefined
         };
         
         // 打印请求数据
@@ -156,10 +202,14 @@ export default {
 </script>
 
 <style scoped>
+/* 让按钮居中且悬浮于底部tab栏上方，适配不同屏幕 */
 .health-record-form {
   position: fixed;
-  bottom: 30rpx;
-  left: 30rpx;
+  left: 0;
+  right: 0;
+  bottom: 120rpx; /* 距底部tab栏上方，避免被遮挡，可根据实际tab栏高度调整 */
+  display: flex;
+  justify-content: center;
   z-index: 100;
 }
 
@@ -253,11 +303,11 @@ export default {
   color: #333;
 }
 
-.input-container {
+/* 垂直排列输入项 */
+.input-container-vertical {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 20rpx;
-  align-items: center;
 }
 
 .input-group {
@@ -268,6 +318,7 @@ export default {
   padding: 0 20rpx;
   height: 80rpx;
   flex: 1;
+  margin-bottom: 0;
 }
 
 .record-input {
@@ -301,4 +352,16 @@ export default {
   cursor: not-allowed;
 }
 
+.picker-display {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  font-size: 32rpx;
+  color: #333;
+}
+.picker-placeholder {
+  color: #bbb;
+}
 </style>

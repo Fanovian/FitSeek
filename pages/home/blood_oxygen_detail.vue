@@ -19,9 +19,7 @@
       <view class="chart-x-axis">
         <text v-for="(cat, idx) in chartData.categories" :key="idx" class="x-label">{{ cat }}</text>
       </view>
-      <view class="chart-y-axis">
-        <text>血氧(%)</text>
-      </view>
+      <view class="chart-y-axis"><!-- 删除纵坐标标识 --></view>
     </view>
     <view class="record-list">
       <view v-for="(item, index) in detailedRecords" :key="index" class="record-item">
@@ -101,42 +99,10 @@ export default {
                 change
               };
             });
-          this.detailedRecords = records.length ? records : [
-            { time: '2025-06-04 09:00', value: '98.2', change: '+0.2%' },
-            { time: '2025-06-04 08:00', value: '98.0', change: '+0.1%' },
-            { time: '2025-06-04 07:00', value: '97.9', change: '-0.1%' },
-            { time: '2025-06-04 06:00', value: '98.0', change: '+0.2%' },
-            { time: '2025-06-04 05:00', value: '97.8', change: '-0.2%' },
-            { time: '2025-06-04 04:00', value: '98.0', change: '+0.1%' },
-            { time: '2025-06-04 03:00', value: '97.9', change: '-0.1%' },
-            { time: '2025-06-04 02:00', value: '98.0', change: '+0.1%' },
-            { time: '2025-06-04 01:00', value: '97.9', change: '-0.1%' },
-          ];
-        } else {
-          this.detailedRecords = [
-            { time: '2025-06-04 09:00', value: '98.2', change: '+0.2%' },
-            { time: '2025-06-04 08:00', value: '98.0', change: '+0.1%' },
-            { time: '2025-06-04 07:00', value: '97.9', change: '-0.1%' },
-            { time: '2025-06-04 06:00', value: '98.0', change: '+0.2%' },
-            { time: '2025-06-04 05:00', value: '97.8', change: '-0.2%' },
-            { time: '2025-06-04 04:00', value: '98.0', change: '+0.1%' },
-            { time: '2025-06-04 03:00', value: '97.9', change: '-0.1%' },
-            { time: '2025-06-04 02:00', value: '98.0', change: '+0.1%' },
-            { time: '2025-06-04 01:00', value: '97.9', change: '-0.1%' },
-          ];
+          this.detailedRecords = records;
         }
       } catch (e) {
-        this.detailedRecords = [
-          { time: '2025-06-04 09:00', value: '98.2', change: '+0.2%' },
-          { time: '2025-06-04 08:00', value: '98.0', change: '+0.1%' },
-          { time: '2025-06-04 07:00', value: '97.9', change: '-0.1%' },
-          { time: '2025-06-04 06:00', value: '98.0', change: '+0.2%' },
-          { time: '2025-06-04 05:00', value: '97.8', change: '-0.2%' },
-          { time: '2025-06-04 04:00', value: '98.0', change: '+0.1%' },
-          { time: '2025-06-04 03:00', value: '97.9', change: '-0.1%' },
-          { time: '2025-06-04 02:00', value: '98.0', change: '+0.1%' },
-          { time: '2025-06-04 01:00', value: '97.9', change: '-0.1%' },
-        ];
+        this.detailedRecords = [];
       }
     }
     await this.$nextTick();
